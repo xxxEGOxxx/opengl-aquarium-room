@@ -131,5 +131,5 @@ void main()
     
 	outColor = vec4(vec3(1.0) - exp(-ilumination*exposition),1);
 	//outColor = vec4(roughness,metallic,0,1);
-    //outColor = vec4(test;
+    //outColor = vec4(test);
 }

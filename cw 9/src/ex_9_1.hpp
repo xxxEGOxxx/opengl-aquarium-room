@@ -34,6 +34,11 @@ namespace models {
 	Core::RenderContext sphereContext;
 	Core::RenderContext windowContext;
 	Core::RenderContext testContext;
+
+	Core::RenderContext sofaContext;
+	Core::RenderContext door1Context;
+	Core::RenderContext door2Context;
+	Core::RenderContext door3Context;
 }
 
 GLuint depthMapFBO;
@@ -49,8 +54,8 @@ Core::Shader_Loader shaderLoader;
 Core::RenderContext shipContext;
 Core::RenderContext sphereContext;
 
-glm::vec3 sunPos = glm::vec3(-4.740971f, 2.149999f, 0.369280f);
-glm::vec3 sunDir = glm::vec3(-0.93633f, 0.351106, 0.003226f);
+glm::vec3 sunPos = glm::vec3(-0.028716f, 2.06441f, 3.84067f);
+glm::vec3 sunDir = glm::vec3(-0.93633f, 0.351106f, 0.003226f);
 glm::vec3 sunColor = glm::vec3(0.9f, 0.9f, 0.7f)*5;
 
 glm::vec3 cameraPos = glm::vec3(0.479490f, 1.250000f, -2.124680f);
@@ -66,11 +71,11 @@ float aspectRatio = 1.f;
 float exposition = 1.f;
 
 glm::vec3 pointlightPos = glm::vec3(0, 2, 0);
-glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6);
+glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6)*3;
 
 glm::vec3 spotlightPos = glm::vec3(0, 0, 0);
 glm::vec3 spotlightConeDir = glm::vec3(0, 0, 0);
-glm::vec3 spotlightColor = glm::vec3(0.4, 0.4, 0.9)*3;
+glm::vec3 spotlightColor = glm::vec3(0.4, 0.4, 0.9)*5;
 float spotlightPhi = 3.14 / 4;
 
 
@@ -194,17 +199,23 @@ void renderScene(GLFWwindow* window)
 		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, 0, 0)) * glm::scale(glm::vec3(0.1f)),
 		glm::vec3(0.5, 0.5, 0.5), 0.7, 0.0);
 
-	drawObjectPBR(models::bedContext, glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f), 0.2f, 0.0f);
+	//drawObjectPBR(models::bedContext, glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f), 0.2f, 0.0f);
 	drawObjectPBR(models::chairContext, glm::mat4(), glm::vec3(0.195239f, 0.37728f, 0.8f), 0.4f, 0.0f);
 	drawObjectPBR(models::deskContext, glm::mat4(), glm::vec3(0.428691f, 0.08022f, 0.036889f), 0.2f, 0.0f);
-	drawObjectPBR(models::doorContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+	//drawObjectPBR(models::doorContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 	drawObjectPBR(models::drawerContext, glm::mat4(), glm::vec3(0.428691f, 0.08022f, 0.036889f), 0.2f, 0.0f);
 	drawObjectPBR(models::marbleBustContext, glm::mat4(), glm::vec3(1.f, 1.f, 1.f), 0.5f, 1.0f);
-	drawObjectPBR(models::materaceContext, glm::mat4(), glm::vec3(0.9f, 0.9f, 0.9f), 0.8f, 0.0f);
+	//drawObjectPBR(models::materaceContext, glm::mat4(), glm::vec3(0.9f, 0.9f, 0.9f), 0.8f, 0.0f);
 	drawObjectPBR(models::pencilsContext, glm::mat4(), glm::vec3(0.10039f, 0.018356f, 0.001935f), 0.1f, 0.0f);
 	drawObjectPBR(models::planeContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 	drawObjectPBR(models::roomContext, glm::mat4(), glm::vec3(0.9f, 0.9f, 0.9f), 0.8f, 0.0f);
-	drawObjectPBR(models::windowContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+	//drawObjectPBR(models::windowContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+
+	drawObjectPBR(models::sofaContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+
+	drawObjectPBR(models::door1Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+	drawObjectPBR(models::door2Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+	drawObjectPBR(models::door3Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 
 	glm::vec3 spaceshipSide = glm::normalize(glm::cross(spaceshipDir, glm::vec3(0.f, 1.f, 0.f)));
 	glm::vec3 spaceshipUp = glm::normalize(glm::cross(spaceshipSide, spaceshipDir));
@@ -273,21 +284,25 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/sphere.obj", sphereContext);
 	loadModelToContext("./models/spaceship.obj", shipContext);
 
-
-	loadModelToContext("./models/bed.obj", models::bedContext);
-	loadModelToContext("./models/chair.obj", models::chairContext);
-	loadModelToContext("./models/desk.obj", models::deskContext);
-	loadModelToContext("./models/door.obj", models::doorContext);
-	loadModelToContext("./models/drawer.obj", models::drawerContext);
-	loadModelToContext("./models/marbleBust.obj", models::marbleBustContext);
-	loadModelToContext("./models/materace.obj", models::materaceContext);
-	loadModelToContext("./models/pencils.obj", models::pencilsContext);
+	//loadModelToContext("./models/bed.obj", models::bedContext);
+	loadModelToContext("./models/Chair_Cube.obj", models::chairContext);
+	loadModelToContext("./models/Desk_Cube.obj", models::deskContext);
+	//loadModelToContext("./models/door.obj", models::doorContext);
+	//loadModelToContext("./models/drawer.obj", models::drawerContext);
+	loadModelToContext("./models/Marble_Bust.obj", models::marbleBustContext);
+	//loadModelToContext("./models/materace.obj", models::materaceContext);
+	loadModelToContext("./models/Pencils_Cylinder.obj", models::pencilsContext);
 	loadModelToContext("./models/plane.obj", models::planeContext);
 	loadModelToContext("./models/room.obj", models::roomContext);
 	loadModelToContext("./models/spaceship.obj", models::spaceshipContext);
 	loadModelToContext("./models/sphere.obj", models::sphereContext);
-	loadModelToContext("./models/window.obj", models::windowContext);
-	loadModelToContext("./models/test.obj", models::testContext);
+	//loadModelToContext("./models/window.obj", models::windowContext);
+	//loadModelToContext("./models/test.obj", models::testContext);
+
+	loadModelToContext("./models/Sofa_baseCube.obj", models::sofaContext);
+	loadModelToContext("./models/Door1.obj", models::door1Context);
+	loadModelToContext("./models/Door2.obj", models::door2Context);
+	loadModelToContext("./models/Door3.obj", models::door3Context);
 
 }
 
