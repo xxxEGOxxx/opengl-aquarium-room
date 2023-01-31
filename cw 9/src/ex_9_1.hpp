@@ -35,10 +35,16 @@ namespace models {
 	Core::RenderContext windowContext;
 	Core::RenderContext testContext;
 
+	Core::RenderContext sofaBaseContext;
 	Core::RenderContext sofaContext;
 	Core::RenderContext door1Context;
 	Core::RenderContext door2Context;
 	Core::RenderContext door3Context;
+
+	Core::RenderContext shelfContext;
+
+	Core::RenderContext fishContext;
+	Core::RenderContext glassWallContext;
 }
 
 GLuint depthMapFBO;
@@ -48,6 +54,7 @@ GLuint program;
 GLuint programSun;
 GLuint programTest;
 GLuint programTex;
+GLuint programDepth;
 
 Core::Shader_Loader shaderLoader;
 
@@ -56,7 +63,7 @@ Core::RenderContext sphereContext;
 
 glm::vec3 sunPos = glm::vec3(-0.028716f, 2.06441f, 3.84067f);
 glm::vec3 sunDir = glm::vec3(-0.93633f, 0.351106f, 0.003226f);
-glm::vec3 sunColor = glm::vec3(0.9f, 0.9f, 0.7f)*5;
+glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f)*5;
 
 glm::vec3 cameraPos = glm::vec3(0.479490f, 1.250000f, -2.124680f);
 glm::vec3 cameraDir = glm::vec3(-0.354510f, 0.000000f, 0.935054f);
@@ -71,7 +78,7 @@ float aspectRatio = 1.f;
 float exposition = 1.f;
 
 glm::vec3 pointlightPos = glm::vec3(0, 2, 0);
-glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6)*3;
+glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6)*5;
 
 glm::vec3 spotlightPos = glm::vec3(0, 0, 0);
 glm::vec3 spotlightConeDir = glm::vec3(0, 0, 0);
@@ -160,27 +167,64 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 
 }
 
-void renderShadowapSun() {
+void drawObjectDepth(Core::RenderContext context, glm::mat4 viewProjectionMatrix, glm::mat4 modelMatrix) {
+
+	glUniformMatrix4fv(glGetUniformLocation(programDepth, "viewProjectionMatrix"), 1, GL_FALSE, (float*)&viewProjectionMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(programDepth, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
+	Core::DrawContext(context);
+}
+
+void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 	float time = glfwGetTime();
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	//uzupelnij o renderowanie glebokosci do tekstury
+	glUseProgram(programDepth);
+
+	//ustawianie przestrzeni rysowania 
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	//bindowanie FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	//czyszczenie mapy głębokości 
+	glClear(GL_DEPTH_BUFFER_BIT);
+	//ustawianie programu
+	glUseProgram(programDepth);
 
 
-
-
-
+	
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, WIDTH, HEIGHT);
 }
 
+void initDepthMap()
+{
+	glGenFramebuffers(1, &depthMapFBO);
+
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+		SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void renderScene(GLFWwindow* window)
 {
 	glClearColor(0.4f, 0.4f, 0.8f, 1.0f);
+	glEnable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	float time = glfwGetTime();
 	updateDeltaTime(time);
-	renderShadowapSun();
+	glm::mat4 lightVPSun = glm::ortho(-3.f, 2.3f, -1.3f, 3.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	renderShadowapSun(depthMapFBO, lightVPSun);
 
 	//space lamp
 	glUseProgram(programSun);
@@ -193,11 +237,11 @@ void renderScene(GLFWwindow* window)
 
 	glUseProgram(program);
 
-	drawObjectPBR(sphereContext, glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::scale(glm::vec3(0.3f)), glm::vec3(0.2, 0.7, 0.3), 0.3, 0.0);
+	drawObjectPBR(sphereContext, glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::scale(glm::vec3(0.3f)), glm::vec4(0.2, 0.7, 0.3, 0), 0.3, 0.0);
 
 	drawObjectPBR(sphereContext,
 		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, 0, 0)) * glm::scale(glm::vec3(0.1f)),
-		glm::vec3(0.5, 0.5, 0.5), 0.7, 0.0);
+		glm::vec4(0.5, 0.5, 0.5, 0), 0.7, 0.0);
 
 	//drawObjectPBR(models::bedContext, glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f), 0.2f, 0.0f);
 	drawObjectPBR(models::chairContext, glm::mat4(), glm::vec3(0.195239f, 0.37728f, 0.8f), 0.4f, 0.0f);
@@ -207,15 +251,21 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBR(models::marbleBustContext, glm::mat4(), glm::vec3(1.f, 1.f, 1.f), 0.5f, 1.0f);
 	//drawObjectPBR(models::materaceContext, glm::mat4(), glm::vec3(0.9f, 0.9f, 0.9f), 0.8f, 0.0f);
 	drawObjectPBR(models::pencilsContext, glm::mat4(), glm::vec3(0.10039f, 0.018356f, 0.001935f), 0.1f, 0.0f);
-	drawObjectPBR(models::planeContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
-	drawObjectPBR(models::roomContext, glm::mat4(), glm::vec3(0.9f, 0.9f, 0.9f), 0.8f, 0.0f);
+	drawObjectPBR(models::planeContext, glm::mat4(), glm::vec3(0.5f, 0.5f, 0.5f), 0.2f, 0.0f);
+	drawObjectPBR(models::roomContext, glm::mat4(), glm::vec3(0.8f, 0.8f, 0.8f), 0.8f, 0.0f);
 	//drawObjectPBR(models::windowContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 
-	drawObjectPBR(models::sofaContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+	drawObjectPBR(models::sofaContext, glm::mat4(), glm::vec3(0.4f, 0.4f, 0.4f), 0.5f, 0.0f);
+	drawObjectPBR(models::sofaBaseContext, glm::mat4(), glm::vec3(0.3f, 0.3f, 0.3f), 0.5f, 0.0f);
 
-	drawObjectPBR(models::door1Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
-	drawObjectPBR(models::door2Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+	drawObjectPBR(models::door1Context, glm::mat4(), glm::vec3(0.4f, 0.4f, 0.4f), 0.2f, 0.0f);
+	drawObjectPBR(models::door2Context, glm::mat4(), glm::vec3(0.4f, 0.4f, 0.4f), 0.2f, 0.0f);
 	drawObjectPBR(models::door3Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
+
+	drawObjectPBR(models::shelfContext, glm::mat4(), glm::vec3(0.2f, 0.2f, 0.2f), 0.5f, 0.0f);
+
+	drawObjectPBR(models::fishContext, glm::mat4(), glm::vec3(0.7f, 0.2f, 0.1f), 0.5f, 0.0f);
+	drawObjectPBR(models::glassWallContext, glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f);
 
 	glm::vec3 spaceshipSide = glm::normalize(glm::cross(spaceshipDir, glm::vec3(0.f, 1.f, 0.f)));
 	glm::vec3 spaceshipUp = glm::normalize(glm::cross(spaceshipSide, spaceshipDir));
@@ -285,8 +335,8 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/spaceship.obj", shipContext);
 
 	//loadModelToContext("./models/bed.obj", models::bedContext);
-	loadModelToContext("./models/Chair_Cube.obj", models::chairContext);
-	loadModelToContext("./models/Desk_Cube.obj", models::deskContext);
+	//loadModelToContext("./models/Chair_Cube.obj", models::chairContext);
+	//loadModelToContext("./models/Desk_Cube.obj", models::deskContext);
 	//loadModelToContext("./models/door.obj", models::doorContext);
 	//loadModelToContext("./models/drawer.obj", models::drawerContext);
 	loadModelToContext("./models/Marble_Bust.obj", models::marbleBustContext);
@@ -300,10 +350,14 @@ void init(GLFWwindow* window)
 	//loadModelToContext("./models/test.obj", models::testContext);
 
 	loadModelToContext("./models/Sofa_baseCube.obj", models::sofaContext);
+	loadModelToContext("./models/Sofa_base.obj", models::sofaBaseContext);
 	loadModelToContext("./models/Door1.obj", models::door1Context);
 	loadModelToContext("./models/Door2.obj", models::door2Context);
 	loadModelToContext("./models/Door3.obj", models::door3Context);
 
+	loadModelToContext("./models/Shelf.obj", models::shelfContext);
+	loadModelToContext("./models/fish.obj", models::fishContext);
+	loadModelToContext("./models/Glass_wall.obj", models::glassWallContext);
 }
 
 void shutdown(GLFWwindow* window)
@@ -360,7 +414,6 @@ void renderLoop(GLFWwindow* window) {
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-
 		renderScene(window);
 		glfwPollEvents();
 	}

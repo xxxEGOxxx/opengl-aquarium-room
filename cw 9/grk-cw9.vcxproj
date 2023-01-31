@@ -43,6 +43,8 @@
     <None Include="shaders\shader_8_sun.vert" />
     <None Include="shaders\test.frag" />
     <None Include="shaders\test.vert" />
+    <None Include="shader_shadow_global_sun.frag" />
+    <None Include="shader_shadow_global_sun.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5BACD057-4B83-4CB6-A367-40A10BCE2149}</ProjectGuid>
