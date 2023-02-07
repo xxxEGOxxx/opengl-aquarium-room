@@ -103,9 +103,6 @@
     <None Include="shaders\shader_9_1.vert">
       <Filter>Shader Files</Filter>
     </None>
-    <None Include="shaders\test.frag">
-      <Filter>Shader Files</Filter>
-    </None>
     <None Include="shaders\test.vert">
       <Filter>Shader Files</Filter>
     </None>
@@ -115,5 +112,8 @@
     <None Include="shader_shadow_global_sun.frag">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="shaders\shader_skybox.frag" />
+    <None Include="shaders\shader_skybox.vert" />
+    <None Include="shaders\test.frag" />
   </ItemGroup>
 </Project>

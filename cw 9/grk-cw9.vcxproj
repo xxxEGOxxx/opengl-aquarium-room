@@ -41,6 +41,8 @@
     <None Include="shaders\shader_9_1.vert" />
     <None Include="shaders\shader_8_sun.frag" />
     <None Include="shaders\shader_8_sun.vert" />
+    <None Include="shaders\shader_skybox.frag" />
+    <None Include="shaders\shader_skybox.vert" />
     <None Include="shaders\test.frag" />
     <None Include="shaders\test.vert" />
     <None Include="shader_shadow_global_sun.frag" />
@@ -80,7 +82,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SolutionDir)dependencies\freeglut\lib;$(SolutionDir)dependencies\glew-2.0.0\lib\Release\Win32;$(SolutionDir)dependencies\glfw-3.3.8.bin.WIN32\lib-vc2019;$(SolutionDir)dependencies\assimp;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)dependencies\freeglut\include\GL;$(SolutionDir)dependencies\glew-2.0.0\include\GL;$(SolutionDir)dependencies\glm;$(SolutionDir)dependencies\glfw-3.3.8.bin.WIN32\include;$(SolutionDir)dependencies\assimp\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\freeglut\include\GL;$(SolutionDir)dependencies\soil;$(SolutionDir)dependencies\glew-2.0.0\include\GL;$(SolutionDir)dependencies\glm;$(SolutionDir)dependencies\glfw-3.3.8.bin.WIN32\include;$(SolutionDir)dependencies\assimp\include;$(IncludePath)</IncludePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -7,6 +7,7 @@
 
 #include "Shader_Loader.h"
 #include "Render_Utils.h"
+#include "SOIL.h"
 //#include "Texture.h"
 
 #include "Box.cpp"
@@ -51,6 +52,7 @@ GLuint depthMapFBO;
 GLuint depthMap;
 
 GLuint program;
+GLuint programSkybox;
 GLuint programSun;
 GLuint programTest;
 GLuint programTex;
@@ -85,7 +87,49 @@ glm::vec3 spotlightConeDir = glm::vec3(0, 0, 0);
 glm::vec3 spotlightColor = glm::vec3(0.4, 0.4, 0.9)*5;
 float spotlightPhi = 3.14 / 4;
 
+float skyboxVertices[] =
+{
+	-150.0f, -150.0f,  150.0f,
+	 150.0f, -150.0f,  150.0f,
+	 150.0f, -150.0f, -150.0f,
+	-150.0f, -150.0f, -150.0f,
+	-150.0f,  150.0f,  150.0f,
+	 150.0f,  150.0f,  150.0f,
+	 150.0f,  150.0f, -150.0f,
+	-150.0f,  150.0f, -150.0f
+};
 
+//
+unsigned int skyboxIndices[] =
+{
+	1, 2, 6, 
+	6, 5, 1,
+	0, 4, 7, 
+	7, 3, 0,
+	4, 5, 6, 
+	6, 7, 4,
+	0, 3, 2, 
+	2, 1, 0,
+	0, 1, 5, 
+	5, 4, 0,
+	3, 7, 6, 
+	6, 2, 3
+};
+
+std::string facesCubemap[6] =
+{
+	"./textures/skybox/rt.png",
+	"./textures/skybox/lt.png",
+	"./textures/skybox/tp.png",
+	"./textures/skybox/bm.png",
+	"./textures/skybox/ft.png",
+	"./textures/skybox/bk.png"
+};
+
+unsigned int cubemapTexture;
+
+unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+//
 
 float lastTime = -1.f;
 float deltaTime = 0.f;
@@ -220,15 +264,38 @@ void renderScene(GLFWwindow* window)
 {
 	glClearColor(0.4f, 0.4f, 0.8f, 1.0f);
 	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	float time = glfwGetTime();
 	updateDeltaTime(time);
+
+	//drawing skybox
+	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+
+	glUseProgram(programSkybox);
+	glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
+	glm::mat4 transformationSky = viewProjectionMatrix * glm::translate(cameraPos) * glm::scale(glm::vec3(0.1));
+	glUniformMatrix4fv(glGetUniformLocation(programSkybox, "transformation"), 1, GL_FALSE, (float*)&transformationSky);
+
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glDepthFunc(GL_LESS);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	//
+
 	glm::mat4 lightVPSun = glm::ortho(-3.f, 2.3f, -1.3f, 3.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	renderShadowapSun(depthMapFBO, lightVPSun);
 
 	//space lamp
 	glUseProgram(programSun);
-	glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
+	//glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
 	glm::mat4 transformation = viewProjectionMatrix * glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1));
 	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation);
 	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor.x / 2, sunColor.y / 2, sunColor.z / 2);
@@ -276,7 +343,6 @@ void renderScene(GLFWwindow* window)
 		0.,0.,0.,1.,
 		});
 
-
 	//drawObjectColor(shipContext,
 	//	glm::translate(cameraPos + 1.5 * cameraDir + cameraUp * -0.5f) * inveseCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()),
 	//	glm::vec3(0.3, 0.3, 0.5)
@@ -290,8 +356,6 @@ void renderScene(GLFWwindow* window)
 	spotlightPos = spaceshipPos + 0.2 * spaceshipDir;
 	spotlightConeDir = spaceshipDir;
 
-
-
 	//test depth buffer
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glUseProgram(programTest);
@@ -302,6 +366,7 @@ void renderScene(GLFWwindow* window)
 	glUseProgram(0);
 	glfwSwapBuffers(window);
 }
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	aspectRatio = width / float(height);
@@ -358,6 +423,44 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/Shelf.obj", models::shelfContext);
 	loadModelToContext("./models/fish.obj", models::fishContext);
 	loadModelToContext("./models/Glass_wall.obj", models::glassWallContext);
+
+	//prepering skybox
+	programSkybox = shaderLoader.CreateProgram("shaders/shader_skybox.vert", "shaders/shader_skybox.frag");
+	glUseProgram(programSkybox);
+	glUniform1i(glGetUniformLocation(programSkybox, "skybox"), 0);
+
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glGenBuffers(1, &skyboxEBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glGenTextures(1, &cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		int w, h;
+		unsigned char* data = SOIL_load_image(facesCubemap[i].c_str(), &w, &h, 0, SOIL_LOAD_RGBA);
+		glTexImage2D(
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data
+		);
+	}
+	//
 }
 
 void shutdown(GLFWwindow* window)
