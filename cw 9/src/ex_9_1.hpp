@@ -77,7 +77,7 @@ GLuint VAO,VBO;
 
 float aspectRatio = 1.f;
 
-float exposition = 1.f;
+float exposition = 3.f;
 
 glm::vec3 pointlightPos = glm::vec3(0, 2, 0);
 glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6)*5;
@@ -130,6 +130,10 @@ unsigned int cubemapTexture;
 
 unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
 //
+
+bool animal_in_box = true;
+bool animal_in_hand = false;
+bool animal_in_aquarium = false;
 
 float lastTime = -1.f;
 float deltaTime = 0.f;
@@ -304,7 +308,9 @@ void renderScene(GLFWwindow* window)
 
 	glUseProgram(program);
 
-	drawObjectPBR(sphereContext, glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::scale(glm::vec3(0.3f)), glm::vec4(0.2, 0.7, 0.3, 0), 0.3, 0.0);
+	drawObjectPBR(sphereContext,
+		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::scale(glm::vec3(0.3f)),
+		glm::vec4(0.2, 0.7, 0.3, 0), 0.3, 0.0);
 
 	drawObjectPBR(sphereContext,
 		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, 0, 0)) * glm::scale(glm::vec3(0.1f)),
@@ -343,15 +349,35 @@ void renderScene(GLFWwindow* window)
 		0.,0.,0.,1.,
 		});
 
-	//drawObjectColor(shipContext,
-	//	glm::translate(cameraPos + 1.5 * cameraDir + cameraUp * -0.5f) * inveseCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()),
-	//	glm::vec3(0.3, 0.3, 0.5)
-	//	);
 	drawObjectPBR(shipContext,
 		glm::translate(spaceshipPos) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.03f)),
 		glm::vec3(0.3, 0.3, 0.5),
-		0.2,1.0
+		0.2, 1.0
 	);
+
+	if (animal_in_hand) {
+		drawObjectPBR(sphereContext,
+			glm::translate(spaceshipPos) * glm::translate(glm::vec3(0, 0.06f, 0)) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.05f)),
+			glm::vec3(0.7f, 0.2f, 0.1f),
+			0.5, 0.0
+		);
+	}
+
+	if (animal_in_aquarium) {
+		drawObjectPBR(sphereContext,
+			glm::translate(glm::vec3(2.5f, 1.25f, 0.0f)) * glm::scale(glm::vec3(0.05f)) * glm::eulerAngleY(time) * glm::translate(glm::vec3(20.f, 0, 0)),
+			glm::vec3(0.7f, 0.2f, 0.1f),
+			0.5, 0.0
+		);
+	}
+
+	if (animal_in_box) {
+		drawObjectPBR(sphereContext,
+			glm::translate(glm::vec3(-6.55f, 1.39f, 1.11f)) * glm::scale(glm::vec3(0.05f)),
+			glm::vec3(0.7f, 0.2f, 0.1f),
+			0.5, 0.0
+		);
+	}
 
 	spotlightPos = spaceshipPos + 0.2 * spaceshipDir;
 	spotlightConeDir = spaceshipDir;
@@ -469,6 +495,48 @@ void shutdown(GLFWwindow* window)
 }
 
 //obsluga wejscia
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_P && action == GLFW_PRESS)
+	{
+		if (cameraPos.x >= -6.57f && cameraPos.x <= -5.67f &&
+			cameraPos.y >= 0.65f && cameraPos.y <= 1.75f &&
+			cameraPos.z >= 0.27f && cameraPos.z <= 1.67f) {
+			if (animal_in_box) {
+				printf("animal in hand\n");
+				animal_in_box = false;
+				animal_in_hand = true;
+			}
+			else if (animal_in_hand) {
+				printf("animal in box\n");
+				animal_in_box = true;
+				animal_in_hand = false;
+			}
+		}
+		if (cameraPos.x >= -1.0f && cameraPos.x <= 0.6f &&
+			cameraPos.y >= 0.0f && cameraPos.y <= 3.0f &&
+			cameraPos.z >= -4.6f && cameraPos.z <= 4.7f) {
+			if (animal_in_aquarium) {
+				printf("animal in hand\n");
+				animal_in_aquarium = false;
+				animal_in_hand = true;
+			}
+			else if (animal_in_hand) {
+				printf("animal in aquarium\n");
+				animal_in_aquarium = true;
+				animal_in_hand = false;
+			}
+		}
+	}
+
+	if (key == GLFW_KEY_3 && action == GLFW_PRESS) 
+	{
+		printf("spaceshipPos = glm::vec3(%ff, %ff, %ff);\n", spaceshipPos.x, spaceshipPos.y, spaceshipPos.z);
+		printf("spaceshipDir = glm::vec3(%ff, %ff, %ff);\n", spaceshipDir.x, spaceshipDir.y, spaceshipDir.z);
+	}
+}
+
+
 void processInput(GLFWwindow* window)
 {
 	glm::vec3 spaceshipSide = glm::normalize(glm::cross(spaceshipDir, glm::vec3(0.f,1.f,0.f)));
@@ -482,7 +550,11 @@ void processInput(GLFWwindow* window)
 		spaceshipPos += spaceshipDir * moveSpeed;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		spaceshipPos -= spaceshipDir * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		spaceshipDir = glm::vec3(glm::eulerAngleY(angleSpeed) * glm::vec4(spaceshipDir, 0));
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		spaceshipDir = glm::vec3(glm::eulerAngleY(-angleSpeed) * glm::vec4(spaceshipDir, 0));
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
 		spaceshipPos += spaceshipSide * moveSpeed;
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
 		spaceshipPos -= spaceshipSide * moveSpeed;
@@ -490,10 +562,6 @@ void processInput(GLFWwindow* window)
 		spaceshipPos += spaceshipUp * moveSpeed;
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		spaceshipPos -= spaceshipUp * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		spaceshipDir = glm::vec3(glm::eulerAngleY(angleSpeed) * glm::vec4(spaceshipDir, 0));
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		spaceshipDir = glm::vec3(glm::eulerAngleY(-angleSpeed) * glm::vec4(spaceshipDir, 0));
 
 	cameraPos = spaceshipPos - 0.5 * spaceshipDir + glm::vec3(0, 1, 0) * 0.2f;
 	cameraDir = spaceshipDir;
@@ -503,14 +571,11 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
 		exposition += 0.05;
 
-	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-		printf("spaceshipPos = glm::vec3(%ff, %ff, %ff);\n", spaceshipPos.x, spaceshipPos.y, spaceshipPos.z);
-		printf("spaceshipDir = glm::vec3(%ff, %ff, %ff);\n", spaceshipDir.x, spaceshipDir.y, spaceshipDir.z);
-	}
+	glfwSetKeyCallback(window, key_callback);
 
 	//cameraDir = glm::normalize(-cameraPos);
-
 }
+
 
 // funkcja jest glowna petla
 void renderLoop(GLFWwindow* window) {
