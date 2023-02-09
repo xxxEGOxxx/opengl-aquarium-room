@@ -492,11 +492,11 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f);
 	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f);
 	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f);
-	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f);
+	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f);
@@ -546,6 +546,7 @@ void init(GLFWwindow* window)
 	programTest = shaderLoader.CreateProgram("shaders/test.vert", "shaders/test.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_8_sun.vert", "shaders/shader_8_sun.frag");
 
+
 	//loading models
 	loadModelToContext("./models/sphere.obj", sphereContext);
 	loadModelToContext("./models/spaceship.obj", shipContext);
@@ -575,8 +576,11 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/door_next_to.obj", models::door_next_toContext);
 	loadModelToContext("./models/door_next_to_doorhandle.obj", models::door_next_to_doorhandleContext);
 
-
 	//loading textures
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//textures that contain transparency should be here
+	glDisable(GL_BLEND);
 	programTex = shaderLoader.CreateProgram("shaders/shader_texture.vert", "shaders/shader_texture.frag");
 	texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
 	texture::fishTexture = Core::LoadTexture("textures/fish.png");

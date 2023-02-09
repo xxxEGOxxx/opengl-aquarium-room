@@ -146,7 +146,8 @@ void main()
 	ilumination=ilumination+PBRLight(sunDir,sunColor,normal,viewDir);
 
     
-	outColor = vec4(vec3(1.0) - exp(-ilumination*exposition),1);
+	//outColor = vec4(vec3(1.0) - exp(-ilumination*exposition),1);
+    outColor = vec4(vec3(1.0) - exp(-ilumination*exposition), texture2D(colorTexture, vecTex).a);
 	//outColor = vec4(roughness,metallic,0,1);
     //outColor = vec4(test);
 }
