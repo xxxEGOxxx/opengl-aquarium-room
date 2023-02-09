@@ -91,7 +91,8 @@ Core::RenderContext sphereContext;
 
 glm::vec3 sunPos = glm::vec3(-0.028716f, 2.06441f, 3.84067f);
 glm::vec3 sunDir = glm::vec3(-0.93633f, 0.351106f, 0.003226f);
-glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f)*10.00001;
+glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f) * 5;
+glm::vec3 sunColor1 = glm::vec3(0.9f, 0.6f, 0.7f) * 5;
 glm::vec3 sunColor2 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
 glm::vec3 sunColor3 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
 
@@ -111,8 +112,8 @@ glm::vec3 pointlightPos = glm::vec3(-3.5, 2.8, 0);
 glm::vec3 pointlightPos2 = glm::vec3(4.5, 2.8, 3);
 glm::vec3 pointlightPos3 = glm::vec3(4.5, 2.8, -2.99);
 glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6) * 20;
-glm::vec3 pointlightColor2 = glm::vec3(1, 0.2, 0.2) * 20;
-glm::vec3 pointlightColor3 = glm::vec3(1, 0.2, 0.2) * 20;
+glm::vec3 pointlightColor2 = glm::vec3(1, 0.2, 0.2) * 10;
+glm::vec3 pointlightColor3 = glm::vec3(1, 0.2, 0.2) * 10;
 
 
 glm::vec3 spotlightPos = glm::vec3(0, 0, 0);
@@ -275,7 +276,11 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform3f(glGetUniformLocation(programTex, "sunColor"), sunColor.x, sunColor.y, sunColor.z);
 
 	glUniform3f(glGetUniformLocation(programTex, "lightPos"), pointlightPos.x, pointlightPos.y, pointlightPos.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightPos2"), pointlightPos2.x, pointlightPos2.y, pointlightPos2.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightPos3"), pointlightPos3.x, pointlightPos3.y, pointlightPos3.z);
 	glUniform3f(glGetUniformLocation(programTex, "lightColor"), pointlightColor.x, pointlightColor.y, pointlightColor.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightColor2"), pointlightColor2.x, pointlightColor2.y, pointlightColor2.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightColor3"), pointlightColor3.x, pointlightColor3.y, pointlightColor3.z);
 
 	glUniform3f(glGetUniformLocation(programTex, "spotlightConeDir"), spotlightConeDir.x, spotlightConeDir.y, spotlightConeDir.z);
 	glUniform3f(glGetUniformLocation(programTex, "spotlightPos"), spotlightPos.x, spotlightPos.y, spotlightPos.z);
@@ -382,7 +387,7 @@ void renderScene(GLFWwindow* window)
 	//glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
 	glm::mat4 transformation = viewProjectionMatrix * glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1));
 	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation);
-	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor.x / 2, sunColor.y / 2, sunColor.z / 2);
+	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor1.x / 2, sunColor1.y / 2, sunColor1.z / 2);
 	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
 	Core::DrawContext(sphereContext);
 
