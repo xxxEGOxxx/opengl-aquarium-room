@@ -13,7 +13,11 @@ uniform vec3 sunDir;
 uniform vec3 sunColor;
 
 uniform vec3 lightPos;
+uniform vec3 lightPos2;
+uniform vec3 lightPos3;
 uniform vec3 lightColor;
+uniform vec3 lightColor2;
+uniform vec3 lightColor3;
 
 uniform vec3 spotlightPos;
 uniform vec3 spotlightColor;
@@ -30,11 +34,13 @@ in vec3 worldPos;
 
 out vec4 outColor;
 
-
 in vec3 viewDirTS;
+in vec3 lightDirTS2;
+in vec3 lightDirTS3;
 in vec3 lightDirTS;
 in vec3 spotlightDirTS;
 in vec3 sunDirTS;
+
 
 in vec3 test;
 
@@ -108,13 +114,22 @@ void main()
     vec3 viewDir = normalize(cameraPos-worldPos);
 
 	//vec3 lightDir = normalize(lightDirTS);
+    //vec3 lightDir2 = normalize(lightDirTS2);
+    //vec3 lightDir3 = normalize(lightDirTS3);
 	vec3 lightDir = normalize(lightPos-worldPos);
-
+    vec3 lightDir2 = normalize(lightPos2-worldPos);
+    vec3 lightDir3 = normalize(lightPos3-worldPos);
 
 	vec3 ambient = AMBIENT*color;
 	vec3 attenuatedlightColor = lightColor/pow(length(lightPos-worldPos),2);
-	vec3 ilumination;
-	ilumination = ambient+PBRLight(lightDir,attenuatedlightColor,normal,viewDir);
+    vec3 ilumination;
+    ilumination = ambient+PBRLight(lightDir,attenuatedlightColor,normal,viewDir);
+
+    vec3 attenuatedlightColor2 = lightColor2/pow(length(lightPos2-worldPos),2);
+    ilumination=ilumination+PBRLight(lightDir2,attenuatedlightColor2,normal,viewDir);
+
+    vec3 attenuatedlightColor3 = lightColor3/pow(length(lightPos3-worldPos),2);
+    ilumination=ilumination+PBRLight(lightDir3,attenuatedlightColor3,normal,viewDir);
 	
 	//flashlight
 	//vec3 spotlightDir= normalize(spotlightDirTS);

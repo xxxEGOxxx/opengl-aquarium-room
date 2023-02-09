@@ -13,7 +13,10 @@ out vec3 vecNormal;
 out vec3 worldPos;
 
 uniform vec3 lightPos;
+uniform vec3 lightPos2;
+uniform vec3 lightPos3;
 uniform vec3 spotlightPos;
+
 uniform vec3 cameraPos;
 uniform vec3 sunDir;
 
@@ -21,6 +24,9 @@ out vec3 viewDirTS;
 out vec3 lightDirTS;
 out vec3 spotlightDirTS;
 out vec3 sunDirTS;
+
+out vec3 lightDirTS2;
+out vec3 lightDirTS3;
 
 void main()
 {
@@ -36,6 +42,10 @@ void main()
 	viewDirTS = TBN*V;
 	vec3 L = normalize(lightPos-worldPos);
 	lightDirTS = TBN*L;
+	vec3 L2 = normalize(lightPos2-worldPos);
+	lightDirTS2 = TBN*L2;
+	vec3 L3 = normalize(lightPos3-worldPos);
+	lightDirTS3 = TBN*L3;
 	vec3 SL = normalize(spotlightPos-worldPos);
 	spotlightDirTS = TBN*SL;
 	sunDirTS = TBN*sunDir;

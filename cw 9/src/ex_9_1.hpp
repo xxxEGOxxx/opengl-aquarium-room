@@ -66,6 +66,8 @@ Core::RenderContext sphereContext;
 glm::vec3 sunPos = glm::vec3(-0.028716f, 2.06441f, 3.84067f);
 glm::vec3 sunDir = glm::vec3(-0.93633f, 0.351106f, 0.003226f);
 glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f)*5;
+glm::vec3 sunColor2 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
+glm::vec3 sunColor3 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
 
 glm::vec3 cameraPos = glm::vec3(0.479490f, 1.250000f, -2.124680f);
 glm::vec3 cameraDir = glm::vec3(-0.354510f, 0.000000f, 0.935054f);
@@ -79,8 +81,13 @@ float aspectRatio = 1.f;
 
 float exposition = 3.f;
 
-glm::vec3 pointlightPos = glm::vec3(0, 2, 0);
-glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6)*5;
+glm::vec3 pointlightPos = glm::vec3(-3.5, 2.8, 0);
+glm::vec3 pointlightPos2 = glm::vec3(4.5, 2.8, 3);
+glm::vec3 pointlightPos3 = glm::vec3(4.5, 2.8, -2.99);
+glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6) * 5;
+glm::vec3 pointlightColor2 = glm::vec3(1, 0.2, 0.2) * 5;
+glm::vec3 pointlightColor3 = glm::vec3(1, 0.2, 0.2) * 5;
+
 
 glm::vec3 spotlightPos = glm::vec3(0, 0, 0);
 glm::vec3 spotlightConeDir = glm::vec3(0, 0, 0);
@@ -205,7 +212,11 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 	glUniform3f(glGetUniformLocation(program, "sunColor"), sunColor.x, sunColor.y, sunColor.z);
 
 	glUniform3f(glGetUniformLocation(program, "lightPos"), pointlightPos.x, pointlightPos.y, pointlightPos.z);
+	glUniform3f(glGetUniformLocation(program, "lightPos2"), pointlightPos2.x, pointlightPos2.y, pointlightPos2.z);
+	glUniform3f(glGetUniformLocation(program, "lightPos3"), pointlightPos3.x, pointlightPos3.y, pointlightPos3.z);
 	glUniform3f(glGetUniformLocation(program, "lightColor"), pointlightColor.x, pointlightColor.y, pointlightColor.z);
+	glUniform3f(glGetUniformLocation(program, "lightColor2"), pointlightColor2.x, pointlightColor2.y, pointlightColor2.z);
+	glUniform3f(glGetUniformLocation(program, "lightColor3"), pointlightColor3.x, pointlightColor3.y, pointlightColor3.z);
 
 	glUniform3f(glGetUniformLocation(program, "spotlightConeDir"), spotlightConeDir.x, spotlightConeDir.y, spotlightConeDir.z);
 	glUniform3f(glGetUniformLocation(program, "spotlightPos"), spotlightPos.x, spotlightPos.y, spotlightPos.z);
@@ -306,8 +317,22 @@ void renderScene(GLFWwindow* window)
 	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
 	Core::DrawContext(sphereContext);
 
+	glm::mat4 transformation2 = viewProjectionMatrix * glm::translate(pointlightPos2) * glm::scale(glm::vec3(0.1));
+	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation2);
+	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor2.x / 2, sunColor2.y / 2, sunColor2.z / 2);
+	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
+	Core::DrawContext(sphereContext);
+
+	glm::mat4 transformation3 = viewProjectionMatrix * glm::translate(pointlightPos3) * glm::scale(glm::vec3(0.1));
+	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation3);
+	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor3.x / 2, sunColor3.y / 2, sunColor3.z / 2);
+	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
+	Core::DrawContext(sphereContext);
+
+
 	glUseProgram(program);
 
+	/*
 	drawObjectPBR(sphereContext,
 		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::scale(glm::vec3(0.3f)),
 		glm::vec4(0.2, 0.7, 0.3, 0), 0.3, 0.0);
@@ -315,6 +340,7 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBR(sphereContext,
 		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, 0, 0)) * glm::scale(glm::vec3(0.1f)),
 		glm::vec4(0.5, 0.5, 0.5, 0), 0.7, 0.0);
+	*/
 
 	//drawObjectPBR(models::bedContext, glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f), 0.2f, 0.0f);
 	drawObjectPBR(models::chairContext, glm::mat4(), glm::vec3(0.195239f, 0.37728f, 0.8f), 0.4f, 0.0f);
