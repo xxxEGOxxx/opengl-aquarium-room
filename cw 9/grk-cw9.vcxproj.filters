@@ -114,6 +114,14 @@
     </None>
     <None Include="shaders\shader_skybox.frag" />
     <None Include="shaders\shader_skybox.vert" />
-    <None Include="shaders\test.frag" />
+    <None Include="shaders\test.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shader_texture.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shader_texture.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

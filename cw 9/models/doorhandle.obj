@@ -1,6 +1,6 @@
 # Blender 3.4.1
 # www.blender.org
-mtllib DoorCircle.mtl
+mtllib doorhandle.mtl
 o Circle.002_Circle
 v -3.558626 1.047657 -4.834811
 v -3.619612 1.063660 -4.811638
