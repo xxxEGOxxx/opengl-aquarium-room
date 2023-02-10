@@ -82,6 +82,7 @@ GLuint programSkybox;
 GLuint programSun;
 GLuint programTest;
 GLuint programTex;
+GLuint programTexLarge;
 GLuint programDepth;
 
 Core::Shader_Loader shaderLoader;
@@ -252,10 +253,15 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 
 }
 
-void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatrix, GLuint textureID, float roughness, float metallic) {
+void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatrix, GLuint textureID, float roughness, float metallic, float size) {
 	glUseProgram(programTex);
 	glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
 	glm::mat4 transformation = viewProjectionMatrix * modelMatrix;
+
+
+	glUniform1f(glGetUniformLocation(programTex, "size"), size);
+
+
 	/*glm::mat4 transformation = modelMatrix;*/
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "transformation"), 1, GL_FALSE, (float*)&transformation);
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
@@ -266,6 +272,7 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 
 	glUniform1f(glGetUniformLocation(programTex, "roughness"), roughness);
 	glUniform1f(glGetUniformLocation(programTex, "metallic"), metallic);
+
 
 	//glUniform3f(glGetUniformLocation(program, "color"), color.x, color.y, color.z);
 
@@ -484,22 +491,22 @@ void renderScene(GLFWwindow* window)
 
 	//draw texture with PBR
 
-	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f);
-	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f);
-	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f);
-	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::door2Context, glm::mat4(), texture::door2Texture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::door3Context, glm::mat4(), texture::door3Texture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::doorhandleContext, glm::mat4(), texture::doorhandleTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::door_next_toContext, glm::mat4(), texture::door_next_toTexture, 0.5f, 0.0f);
-	drawObjectPBRWithTexture(models::door_next_to_doorhandleContext, glm::mat4(), texture::door_next_to_doorhandleTexture, 0.5f, 0.0f);
+	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f,5);
+	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::door2Context, glm::mat4(), texture::door2Texture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::door3Context, glm::mat4(), texture::door3Texture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::doorhandleContext, glm::mat4(), texture::doorhandleTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::door_next_toContext, glm::mat4(), texture::door_next_toTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::door_next_to_doorhandleContext, glm::mat4(), texture::door_next_to_doorhandleTexture, 0.5f, 0.0f, 0);
 
 	//test depth buffer
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -573,6 +580,7 @@ void init(GLFWwindow* window)
 
 	//loading textures
 	programTex = shaderLoader.CreateProgram("shaders/shader_texture.vert", "shaders/shader_texture.frag");
+	
 	texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
 	texture::fishTexture = Core::LoadTexture("textures/fish.png");
 	texture::roomTexture = Core::LoadTexture("textures/wall.jpg");

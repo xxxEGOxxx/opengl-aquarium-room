@@ -8,6 +8,7 @@ layout(location = 4) in vec3 vertexBitangent;
 
 uniform mat4 transformation;
 uniform mat4 modelMatrix;
+uniform float size;
 
 out vec3 vecNormal;
 out vec3 worldPos;
@@ -50,8 +51,12 @@ void main()
 	vec3 SL = normalize(spotlightPos-worldPos);
 	spotlightDirTS = TBN*SL;
 	sunDirTS = TBN*sunDir;
-	
-	vecTex = vertexTexCoord;
-	vecTex.y = 1.0 - vecTex.y;
-
+	if(size == 5){
+		vecTex = vertexTexCoord * vec2(10,10);
+		vecTex.y = 1.0 - vecTex.y;
+	}
+	else{
+		vecTex = vertexTexCoord;
+		vecTex.y = 1.0 - vecTex.y;
+	}
 }
