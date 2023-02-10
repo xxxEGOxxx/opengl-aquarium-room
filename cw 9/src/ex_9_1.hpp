@@ -90,11 +90,9 @@ Core::Shader_Loader shaderLoader;
 Core::RenderContext shipContext;
 Core::RenderContext sphereContext;
 
-glm::vec3 sunPos = glm::vec3(-0.028716f, 2.06441f, 3.84067f);
-glm::vec3 sunDir = glm::vec3(-0.93633f, 0.351106f, 0.003226f);
-glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f)*10.00001;
-glm::vec3 sunColor2 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
-glm::vec3 sunColor3 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
+glm::vec3 sunPos = glm::vec3(0.f, 0.f, 0.f);
+glm::vec3 sunDir = glm::vec3(0.f, 4.f, 0.f);
+glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f) * 0.15;
 
 glm::vec3 cameraPos = glm::vec3(0.479490f, 1.250000f, -2.124680f);
 glm::vec3 cameraDir = glm::vec3(-0.354510f, 0.000000f, 0.935054f);
@@ -108,10 +106,15 @@ float aspectRatio = 1.f;
 
 float exposition = 1.f;
 
+glm::vec3 lampColor = glm::vec3(0.9f, 0.6f, 0.7f) * 5;
+glm::vec3 lampColor2 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
+glm::vec3 lampColor3 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
+
 glm::vec3 pointlightPos = glm::vec3(-3.5, 2.8, 0);
 glm::vec3 pointlightPos2 = glm::vec3(4.5, 2.8, 3);
 glm::vec3 pointlightPos3 = glm::vec3(4.5, 2.8, -2.99);
-glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6) * 20;
+
+glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6) * 30;
 glm::vec3 pointlightColor2 = glm::vec3(1, 0.2, 0.2) * 20;
 glm::vec3 pointlightColor3 = glm::vec3(1, 0.2, 0.2) * 20;
 
@@ -150,6 +153,7 @@ unsigned int skyboxIndices[] =
 	6, 2, 3
 };
 
+/*
 std::string facesCubemap[6] =
 {
 	"./textures/skybox/rt.png",
@@ -159,6 +163,18 @@ std::string facesCubemap[6] =
 	"./textures/skybox/ft.png",
 	"./textures/skybox/bk.png"
 };
+*/
+std::string facesCubemap[6] =
+{
+	"./textures/skybox/space_lf.png",
+	"./textures/skybox/space_rt.png",
+	"./textures/skybox/space_up.png",
+	"./textures/skybox/space_dn.png",
+	"./textures/skybox/space_ft.png",
+	"./textures/skybox/space_bk.png"
+};
+
+
 
 unsigned int cubemapTexture;
 
@@ -282,7 +298,11 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform3f(glGetUniformLocation(programTex, "sunColor"), sunColor.x, sunColor.y, sunColor.z);
 
 	glUniform3f(glGetUniformLocation(programTex, "lightPos"), pointlightPos.x, pointlightPos.y, pointlightPos.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightPos2"), pointlightPos2.x, pointlightPos2.y, pointlightPos2.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightPos3"), pointlightPos3.x, pointlightPos3.y, pointlightPos3.z);
 	glUniform3f(glGetUniformLocation(programTex, "lightColor"), pointlightColor.x, pointlightColor.y, pointlightColor.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightColor2"), pointlightColor2.x, pointlightColor2.y, pointlightColor2.z);
+	glUniform3f(glGetUniformLocation(programTex, "lightColor3"), pointlightColor3.x, pointlightColor3.y, pointlightColor3.z);
 
 	glUniform3f(glGetUniformLocation(programTex, "spotlightConeDir"), spotlightConeDir.x, spotlightConeDir.y, spotlightConeDir.z);
 	glUniform3f(glGetUniformLocation(programTex, "spotlightPos"), spotlightPos.x, spotlightPos.y, spotlightPos.z);
@@ -389,19 +409,19 @@ void renderScene(GLFWwindow* window)
 	//glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
 	glm::mat4 transformation = viewProjectionMatrix * glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1));
 	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation);
-	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor.x / 2, sunColor.y / 2, sunColor.z / 2);
+	glUniform3f(glGetUniformLocation(programSun, "color"), lampColor.x / 2, lampColor.y / 2, lampColor.z / 2);
 	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
 	Core::DrawContext(sphereContext);
 
 	glm::mat4 transformation2 = viewProjectionMatrix * glm::translate(pointlightPos2) * glm::scale(glm::vec3(0.1));
 	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation2);
-	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor2.x / 2, sunColor2.y / 2, sunColor2.z / 2);
+	glUniform3f(glGetUniformLocation(programSun, "color"), lampColor2.x / 2, lampColor2.y / 2, lampColor2.z / 2);
 	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
 	Core::DrawContext(sphereContext);
 
 	glm::mat4 transformation3 = viewProjectionMatrix * glm::translate(pointlightPos3) * glm::scale(glm::vec3(0.1));
 	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation3);
-	glUniform3f(glGetUniformLocation(programSun, "color"), sunColor3.x / 2, sunColor3.y / 2, sunColor3.z / 2);
+	glUniform3f(glGetUniformLocation(programSun, "color"), lampColor3.x / 2, lampColor3.y / 2, lampColor3.z / 2);
 	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
 	Core::DrawContext(sphereContext);
 
@@ -492,7 +512,6 @@ void renderScene(GLFWwindow* window)
 	//draw texture with PBR
 
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f,5);
-	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
 	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 5);
 	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 5);
@@ -507,6 +526,9 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::doorhandleContext, glm::mat4(), texture::doorhandleTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door_next_toContext, glm::mat4(), texture::door_next_toTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door_next_to_doorhandleContext, glm::mat4(), texture::door_next_to_doorhandleTexture, 0.5f, 0.0f, 0);
+
+	//objects with textures that contain transparency should be drawn here (last)
+	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
 
 	//test depth buffer
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -548,6 +570,7 @@ void init(GLFWwindow* window)
 	programTest = shaderLoader.CreateProgram("shaders/test.vert", "shaders/test.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_8_sun.vert", "shaders/shader_8_sun.frag");
 
+
 	//loading models
 	loadModelToContext("./models/sphere.obj", sphereContext);
 	loadModelToContext("./models/spaceship.obj", shipContext);
@@ -577,17 +600,20 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/door_next_to.obj", models::door_next_toContext);
 	loadModelToContext("./models/door_next_to_doorhandle.obj", models::door_next_to_doorhandleContext);
 
-
 	//loading textures
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//textures that contain transparency should be loaded here
+	texture::glassWallTexture = Core::LoadTexture("textures/glass.png");
+	glDisable(GL_BLEND);
 	programTex = shaderLoader.CreateProgram("shaders/shader_texture.vert", "shaders/shader_texture.frag");
-	
 	texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
 	texture::fishTexture = Core::LoadTexture("textures/fish.png");
-	texture::roomTexture = Core::LoadTexture("textures/wall.jpg");
+	texture::roomTexture = Core::LoadTexture("textures/roof.jpg");
 	texture::sofaBaseTexture = Core::LoadTexture("textures/sofa.jpg");
 	texture::sofaTexture = Core::LoadTexture("textures/sofa.jpg");
-	texture::landTexture = Core::LoadTexture("textures/land.jpg");
-	texture::floorTexture = Core::LoadTexture("textures/floor3.png");
+	texture::landTexture = Core::LoadTexture("textures/grass.jpg");
+	texture::floorTexture = Core::LoadTexture("textures/floor.png");
 	texture::roofTexture = Core::LoadTexture("textures/roof.jpg");
 	texture::door1Texture = Core::LoadTexture("textures/Door.jpg");
 	texture::door2Texture = Core::LoadTexture("textures/Door.jpg");
