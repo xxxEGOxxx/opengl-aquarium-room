@@ -12,6 +12,8 @@ uniform mat4 modelMatrix;
 out vec3 vecNormal;
 out vec3 worldPos;
 
+uniform mat4 LightVP;
+
 uniform vec3 lightPos;
 uniform vec3 lightPos2;
 uniform vec3 lightPos3;
@@ -27,6 +29,8 @@ out vec3 sunDirTS;
 
 out vec3 lightDirTS2;
 out vec3 lightDirTS3;
+
+out vec4 sunSpacePos;
 
 void main()
 {
@@ -49,5 +53,7 @@ void main()
 	vec3 SL = normalize(spotlightPos-worldPos);
 	spotlightDirTS = TBN*SL;
 	sunDirTS = TBN*sunDir;
+
+	sunSpacePos=LightVP*modelMatrix*vec4(vertexPosition,1);
 
 }

@@ -55,12 +55,15 @@ namespace models {
 	Core::RenderContext door_next_toContext;
 	Core::RenderContext door_next_to_doorhandleContext;
 
+	Core::RenderContext aquariumContext;
+
 }
 
 namespace texture {
 	GLuint floorTexture;
 	GLuint roomTexture;
 	GLuint fishTexture;
+	GLuint fishRedTexture;
 	GLuint sofaTexture;
 	GLuint sofaBaseTexture;
 	GLuint door1Texture;
@@ -72,6 +75,8 @@ namespace texture {
 	GLuint roofTexture;
 	GLuint door_next_toTexture;
 	GLuint door_next_to_doorhandleTexture;
+	GLuint aquariumTexture;
+	GLuint spaceshipTexture;
 }
 
 GLuint depthMapFBO;
@@ -90,15 +95,16 @@ Core::Shader_Loader shaderLoader;
 Core::RenderContext shipContext;
 Core::RenderContext sphereContext;
 
-glm::vec3 sunPos = glm::vec3(0.f, 0.f, 0.f);
-glm::vec3 sunDir = glm::vec3(0.f, 4.f, 0.f);
-glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f) * 0.15;
+//glm::vec3 sunPos = glm::vec3(-4.740971f, 1.149999f, 0.369280f);
+glm::vec3 sunPos = glm::vec3(-9.5, 4, -5);
+glm::vec3 sunDir = glm::vec3(-1.93633f, 0.351106, -1.003226f);
+glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f) * 1.15;
 
 glm::vec3 cameraPos = glm::vec3(0.479490f, 1.250000f, -2.124680f);
 glm::vec3 cameraDir = glm::vec3(-0.354510f, 0.000000f, 0.935054f);
 
 
-glm::vec3 spaceshipPos = glm::vec3(0.065808f, 1.250000f, -2.189549f);
+glm::vec3 spaceshipPos = glm::vec3(0.065808f, 1.250000f, -2.0f);
 glm::vec3 spaceshipDir = glm::vec3(-0.490263f, 0.000000f, 0.871578f);
 GLuint VAO,VBO;
 
@@ -107,16 +113,16 @@ float aspectRatio = 1.f;
 float exposition = 1.f;
 
 glm::vec3 lampColor = glm::vec3(0.9f, 0.6f, 0.7f) * 5;
-glm::vec3 lampColor2 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
-glm::vec3 lampColor3 = glm::vec3(1.0f, 0.2f, 0.2f) * 5;
+glm::vec3 lampColor2 = glm::vec3(0, 0, 1) * 5;
+glm::vec3 lampColor3 = glm::vec3(0, 0, 1) * 5;
 
-glm::vec3 pointlightPos = glm::vec3(-3.5, 2.8, 0);
+glm::vec3 pointlightPos = glm::vec3(-300.5, 2.8, -0.0001);
 glm::vec3 pointlightPos2 = glm::vec3(4.5, 2.8, 3);
 glm::vec3 pointlightPos3 = glm::vec3(4.5, 2.8, -2.99);
 
 glm::vec3 pointlightColor = glm::vec3(0.9, 0.6, 0.6) * 30;
-glm::vec3 pointlightColor2 = glm::vec3(1, 0.2, 0.2) * 20;
-glm::vec3 pointlightColor3 = glm::vec3(1, 0.2, 0.2) * 20;
+glm::vec3 pointlightColor2 = glm::vec3(0, 0.2, 1) * 20;
+glm::vec3 pointlightColor3 = glm::vec3(0, 0.2, 1) * 20;
 
 
 glm::vec3 spotlightPos = glm::vec3(0, 0, 0);
@@ -265,6 +271,14 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 	glUniform3f(glGetUniformLocation(program, "spotlightPos"), spotlightPos.x, spotlightPos.y, spotlightPos.z);
 	glUniform3f(glGetUniformLocation(program, "spotlightColor"), spotlightColor.x, spotlightColor.y, spotlightColor.z);
 	glUniform1f(glGetUniformLocation(program, "spotlightPhi"), spotlightPhi);
+
+	//For shadows
+	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(glGetUniformLocation(program, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
+	glUniform1i(glGetUniformLocation(program, "depthMap"), 2);
+	glActiveTexture(GL_TEXTURE0 + 2);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+
 	Core::DrawContext(context);
 
 }
@@ -278,10 +292,8 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform1f(glGetUniformLocation(programTex, "size"), size);
 
 
-	/*glm::mat4 transformation = modelMatrix;*/
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "transformation"), 1, GL_FALSE, (float*)&transformation);
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "modelMatrix"), 1, GL_FALSE, (float*)&modelMatrix);
-	//glUniform3f(glGetUniformLocation(programTex, "lightPos"), pointlightPos.x, pointlightPos.y, pointlightPos.z);
 
 
 	glUniform1f(glGetUniformLocation(programTex, "exposition"), exposition);
@@ -310,7 +322,7 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform1f(glGetUniformLocation(programTex, "spotlightPhi"), spotlightPhi);
 
 	//For shadows
-	glm::mat4 lightVP = glm::ortho(-3.f, 2.3f, -1.3f, 3.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(programTex, "depthMap"), 2);
 	glActiveTexture(GL_TEXTURE0 + 2);
@@ -344,9 +356,29 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 	//ustawianie programu
 	glUseProgram(programDepth);
 
+	drawObjectDepth(models::sofaBaseContext, lightVP, glm::mat4());
+	drawObjectDepth(models::sofaContext, lightVP, glm::mat4());
+	drawObjectDepth(models::fishContext, lightVP, glm::mat4());
+	drawObjectDepth(models::fish2Context, lightVP, glm::mat4());
+	drawObjectDepth(models::fish3Context, lightVP, glm::mat4());
+	drawObjectDepth(models::shelfContext, lightVP, glm::mat4());
+	drawObjectDepth(models::pencilsContext, lightVP, glm::mat4());
+	drawObjectDepth(models::aquariumContext, lightVP, glm::mat4());
+	drawObjectDepth(models::roofContext, lightVP, glm::mat4());
+	drawObjectDepth(models::landContext, lightVP, glm::mat4());
+	drawObjectDepth(models::floorContext, lightVP, glm::mat4());
+	drawObjectDepth(models::marbleBustContext, lightVP, glm::mat4());
+	drawObjectDepth(models::roomContext, lightVP, glm::mat4());
+
+	drawObjectDepth(models::door1Context, lightVP, glm::mat4());
+	drawObjectDepth(models::door2Context, lightVP, glm::mat4());
+	drawObjectDepth(models::door3Context, lightVP, glm::mat4());
+	drawObjectDepth(models::doorContext, lightVP, glm::mat4());
+	drawObjectDepth(models::doorhandleContext, lightVP, glm::mat4());
+	drawObjectDepth(models::door_next_toContext, lightVP, glm::mat4());
+	drawObjectDepth(models::door_next_to_doorhandleContext, lightVP, glm::mat4());
 
 	
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, WIDTH, HEIGHT);
 }
@@ -401,8 +433,9 @@ void renderScene(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 	//
 
-	glm::mat4 lightVPSun = glm::ortho(-3.f, 2.3f, -1.3f, 3.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
-	renderShadowapSun(depthMapFBO, lightVPSun);
+	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	
+	renderShadowapSun(depthMapFBO, lightVP);
 
 	//space lamp
 	glUseProgram(programSun);
@@ -439,7 +472,7 @@ void renderScene(GLFWwindow* window)
 	*/
 
 	//drawObjectPBR(models::bedContext, glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f), 0.2f, 0.0f);
-	drawObjectPBR(models::chairContext, glm::mat4(), glm::vec3(0.195239f, 0.37728f, 0.8f), 0.4f, 0.0f);
+	//drawObjectPBR(models::chairContext, glm::mat4(), glm::vec3(0.195239f, 0.37728f, 0.8f), 0.4f, 0.0f);
 	drawObjectPBR(models::deskContext, glm::mat4(), glm::vec3(0.428691f, 0.08022f, 0.036889f), 0.2f, 0.0f);
 	//drawObjectPBR(models::doorContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 	drawObjectPBR(models::drawerContext, glm::mat4(), glm::vec3(0.428691f, 0.08022f, 0.036889f), 0.2f, 0.0f);
@@ -476,12 +509,6 @@ void renderScene(GLFWwindow* window)
 		0.,0.,0.,1.,
 		});
 
-	drawObjectPBR(shipContext,
-		glm::translate(spaceshipPos) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.03f)),
-		glm::vec3(0.3, 0.3, 0.5),
-		0.2, 1.0
-	);
-
 	if (animal_in_hand) {
 		drawObjectPBR(sphereContext,
 			glm::translate(spaceshipPos) * glm::translate(glm::vec3(0, 0.06f, 0)) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.05f)),
@@ -511,14 +538,20 @@ void renderScene(GLFWwindow* window)
 
 	//draw texture with PBR
 
+	drawObjectPBRWithTexture(shipContext,
+		glm::translate(spaceshipPos) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.03f)),
+		texture::spaceshipTexture,
+		0.2, 1.0, 0
+	);
+
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f,5);
 	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 5);
 	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
-	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 10);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f, 0);
-	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f, 5);
-	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishRedTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door2Context, glm::mat4(), texture::door2Texture, 0.5f, 0.0f, 0);
@@ -526,16 +559,21 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::doorhandleContext, glm::mat4(), texture::doorhandleTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door_next_toContext, glm::mat4(), texture::door_next_toTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door_next_to_doorhandleContext, glm::mat4(), texture::door_next_to_doorhandleTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::spaceshipContext, glm::mat4(), texture::spaceshipTexture, 0.5f, 0.0f, 0);
+
 
 	//objects with textures that contain transparency should be drawn here (last)
 	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::aquariumContext, glm::mat4(), texture::aquariumTexture, 0.8f, 0.0f, 5);
+
+	
 
 	//test depth buffer
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glUseProgram(programTest);
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, depthMap);
-	//Core::DrawContext(models::testContext);
+	/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(programTest);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	Core::DrawContext(models::testContext);*/
 
 	glUseProgram(0);
 	glfwSwapBuffers(window);
@@ -565,20 +603,22 @@ void init(GLFWwindow* window)
 {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+	initDepthMap();
+
 	glEnable(GL_DEPTH_TEST);
 	program = shaderLoader.CreateProgram("shaders/shader_9_1.vert", "shaders/shader_9_1.frag");
 	programTest = shaderLoader.CreateProgram("shaders/test.vert", "shaders/test.frag");
 	programSun = shaderLoader.CreateProgram("shaders/shader_8_sun.vert", "shaders/shader_8_sun.frag");
-
+	programDepth = shaderLoader.CreateProgram("shaders/shader_shadow_global_sun.vert", "shaders/shader_shadow_global_sun.frag");
 
 	//loading models
 	loadModelToContext("./models/sphere.obj", sphereContext);
-	loadModelToContext("./models/spaceship.obj", shipContext);
+	loadModelToContext("./models/fighter.obj", shipContext);
 	loadModelToContext("./models/Marble_Bust.obj", models::marbleBustContext);
 	loadModelToContext("./models/Pencils_Cylinder.obj", models::pencilsContext);
 	loadModelToContext("./models/plane.obj", models::floorContext);
 	loadModelToContext("./models/room.obj", models::roomContext);
-	loadModelToContext("./models/spaceship.obj", models::spaceshipContext);
+	//loadModelToContext("./models/spaceship.obj", models::spaceshipContext);
 	loadModelToContext("./models/sphere.obj", models::sphereContext);
 	loadModelToContext("./models/test.obj", models::testContext);
 
@@ -600,20 +640,24 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/door_next_to.obj", models::door_next_toContext);
 	loadModelToContext("./models/door_next_to_doorhandle.obj", models::door_next_to_doorhandleContext);
 
+	loadModelToContext("./models/aquarium.obj", models::aquariumContext);
+
 	//loading textures
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//textures that contain transparency should be loaded here
 	texture::glassWallTexture = Core::LoadTexture("textures/glass.png");
+	texture::aquariumTexture = Core::LoadTexture("textures/glass.png");
 	glDisable(GL_BLEND);
 	programTex = shaderLoader.CreateProgram("shaders/shader_texture.vert", "shaders/shader_texture.frag");
-	texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
+	//texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
 	texture::fishTexture = Core::LoadTexture("textures/fish.png");
+	texture::fishRedTexture = Core::LoadTexture("textures/fish_red.png");
 	texture::roomTexture = Core::LoadTexture("textures/roof.jpg");
-	texture::sofaBaseTexture = Core::LoadTexture("textures/sofa.jpg");
-	texture::sofaTexture = Core::LoadTexture("textures/sofa.jpg");
+	texture::sofaBaseTexture = Core::LoadTexture("textures/sofaa.jpg");
+	texture::sofaTexture = Core::LoadTexture("textures/sofaa.jpg");
 	texture::landTexture = Core::LoadTexture("textures/grass.jpg");
-	texture::floorTexture = Core::LoadTexture("textures/floor.png");
+	texture::floorTexture = Core::LoadTexture("textures/floor3.jpg");
 	texture::roofTexture = Core::LoadTexture("textures/roof.jpg");
 	texture::door1Texture = Core::LoadTexture("textures/Door.jpg");
 	texture::door2Texture = Core::LoadTexture("textures/Door.jpg");
@@ -621,6 +665,7 @@ void init(GLFWwindow* window)
 	texture::doorhandleTexture = Core::LoadTexture("textures/Door.jpg");
 	texture::door_next_toTexture = Core::LoadTexture("textures/Door.jpg");
 	texture::door_next_to_doorhandleTexture = Core::LoadTexture("textures/Door.jpg");
+	texture::spaceshipTexture = Core::LoadTexture("textures/spaceship.png");
 	//
 	
 	//prepering skybox

@@ -10,6 +10,10 @@ uniform mat4 transformation;
 uniform mat4 modelMatrix;
 uniform float size;
 
+
+uniform mat4 LightVP;
+
+
 out vec3 vecNormal;
 out vec3 worldPos;
 out vec2 vecTex;
@@ -29,6 +33,8 @@ out vec3 sunDirTS;
 
 out vec3 lightDirTS2;
 out vec3 lightDirTS3;
+
+out vec4 sunSpacePos;
 
 void main()
 {
@@ -52,11 +58,16 @@ void main()
 	spotlightDirTS = TBN*SL;
 	sunDirTS = TBN*sunDir;
 	if(size == 5){
-		vecTex = vertexTexCoord * vec2(10,10);
+		vecTex = vertexTexCoord * vec2(15,15);
+		vecTex.y = 1.0 - vecTex.y;
+	}
+	else if(size == 10){
+		vecTex = vertexTexCoord * vec2(150,150);
 		vecTex.y = 1.0 - vecTex.y;
 	}
 	else{
 		vecTex = vertexTexCoord;
 		vecTex.y = 1.0 - vecTex.y;
 	}
+	sunSpacePos=LightVP*modelMatrix*vec4(vertexPosition,1);
 }

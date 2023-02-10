@@ -42,6 +42,9 @@ in vec3 spotlightDirTS;
 in vec3 sunDirTS;
 
 
+in vec4 sunSpacePos;
+
+
 in vec3 test;
 
 float DistributionGGX(vec3 normal, vec3 H, float roughness){
@@ -104,6 +107,16 @@ vec3 PBRLight(vec3 lightDir, vec3 radiance, vec3 normal, vec3 V){
 	return (kD * color / PI + specular) * radiance * NdotL;
 }
 
+float calculateShadow() {
+
+	vec4 sunSpacePosNormalized =  (0.5 * sunSpacePos / (sunSpacePos.w)) + 0.5;
+
+    float closestDepth = texture2D(depthMap, sunSpacePosNormalized.xy).x;//r?
+
+    float diff = (0.001+closestDepth) - sunSpacePosNormalized.z;//sunSpacePosNormalized.z;
+
+    return (0.5*(diff)/abs(diff))+0.5;
+}
 
 void main()
 {
@@ -141,7 +154,7 @@ void main()
 	//ilumination=ilumination+PBRLight(spotlightDir,attenuatedlightColor,normal,viewDir);
 
 	//sun
-	ilumination=ilumination+PBRLight(sunDir,sunColor,normal,viewDir);
+	ilumination=ilumination+PBRLight(sunDir,sunColor * calculateShadow(),normal,viewDir);
 
     
 	outColor = vec4(vec3(1.0) - exp(-ilumination*exposition),1);

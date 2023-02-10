@@ -123,5 +123,11 @@
     <None Include="shaders\shader_texture.vert">
       <Filter>Shader Files</Filter>
     </None>
+    <None Include="shaders\shader_shadow_global_sun.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\shader_shadow_global_sun.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
