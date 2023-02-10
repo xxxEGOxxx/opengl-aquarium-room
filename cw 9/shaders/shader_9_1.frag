@@ -133,12 +133,12 @@ void main()
 	
 	//flashlight
 	//vec3 spotlightDir= normalize(spotlightDirTS);
-	vec3 spotlightDir= normalize(spotlightPos-worldPos);
+	//vec3 spotlightDir= normalize(spotlightPos-worldPos);
 	
 
-    float angle_atenuation = clamp((dot(-normalize(spotlightPos-worldPos),spotlightConeDir)-0.5)*3,0,1);
-	attenuatedlightColor = angle_atenuation*spotlightColor/pow(length(spotlightPos-worldPos),2);
-	ilumination=ilumination+PBRLight(spotlightDir,attenuatedlightColor,normal,viewDir);
+    //float angle_atenuation = clamp((dot(-normalize(spotlightPos-worldPos),spotlightConeDir)-0.5)*3,0,1);
+	//attenuatedlightColor = angle_atenuation*spotlightColor/pow(length(spotlightPos-worldPos),2);
+	//ilumination=ilumination+PBRLight(spotlightDir,attenuatedlightColor,normal,viewDir);
 
 	//sun
 	ilumination=ilumination+PBRLight(sunDir,sunColor,normal,viewDir);
