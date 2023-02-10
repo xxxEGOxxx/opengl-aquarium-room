@@ -490,7 +490,6 @@ void renderScene(GLFWwindow* window)
 	//draw texture with PBR
 
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f);
-	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f);
 	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f);
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f);
@@ -512,6 +511,9 @@ void renderScene(GLFWwindow* window)
 	//glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, depthMap);
 	//Core::DrawContext(models::testContext);
+
+	//objects with textures that contain transparency should be drawn here (last)
+	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f);
 
 	glUseProgram(0);
 	glfwSwapBuffers(window);
@@ -579,10 +581,10 @@ void init(GLFWwindow* window)
 	//loading textures
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//textures that contain transparency should be here
+	//textures that contain transparency should be loaded here
+	texture::glassWallTexture = Core::LoadTexture("textures/glass.png");
 	glDisable(GL_BLEND);
 	programTex = shaderLoader.CreateProgram("shaders/shader_texture.vert", "shaders/shader_texture.frag");
-	texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
 	texture::fishTexture = Core::LoadTexture("textures/fish.png");
 	texture::roomTexture = Core::LoadTexture("textures/wall.jpg");
 	texture::sofaBaseTexture = Core::LoadTexture("textures/sofa.jpg");
