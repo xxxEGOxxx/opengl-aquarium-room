@@ -521,10 +521,11 @@ void renderScene(GLFWwindow* window)
 
 	if (animal_in_aquarium) {
 		drawObjectPBRWithTexture(models::fish2Context,
-			glm::translate(glm::vec3(3.f, 1.25f, 0.0f))
+			glm::translate(glm::vec3(3.f, 1.25f, 0.0f)) 
+			* glm::rotate(glm::radians(sin(time) * 10.0f), glm::vec3(1.0f, 0.0f, 0.0f))
 			* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.5f, 0, 0)) 
-			* glm::eulerAngleY(time) *glm::translate(glm::vec3(1.5f, sin(time/3), 0)) * glm::translate(glm::vec3(0, 0, 0)) * glm::scale(glm::vec3(0.5f)) 
-			* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+			* glm::eulerAngleY(time) *glm::translate(glm::vec3(1.f, sin(time/3), 0)) * glm::translate(glm::vec3(0, 0, 0)) 
+			* glm::scale(glm::vec3(0.5f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
 
 			texture::fishRedTexture,
 			0.5f, 0.0f, 0
@@ -533,7 +534,9 @@ void renderScene(GLFWwindow* window)
 
 	if (animal_in_box) {
 		drawObjectPBRWithTexture(models::fish2Context,
-			glm::translate(glm::vec3(-6.55f, 1.25f, 1.11f)) * glm::scale(glm::vec3(0.5f)),
+			glm::translate(glm::vec3(-6.55f, 1.22f, 1.11f)) 
+			* glm::rotate(glm::radians(sin(time) * 15.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::radians(sin(-time) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)) 
+			* glm::translate(glm::vec3(0.0f, 0.05f * sin(1.0f * time), 0.0f)) * glm::scale(glm::vec3(0.5f)),
 			texture::fishRedTexture,
 			0.5f, 0.0f, 0
 		);
