@@ -16,7 +16,8 @@
 #include <assimp/postprocess.h>
 #include <string>
 
-const unsigned int SHADOW_WIDTH = 16384, SHADOW_HEIGHT = 16384;
+//const unsigned int SHADOW_WIDTH = 16384, SHADOW_HEIGHT = 16384;
+const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
 int WIDTH = 500, HEIGHT = 500;
 
