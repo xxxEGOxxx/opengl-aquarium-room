@@ -16,7 +16,7 @@
 #include <assimp/postprocess.h>
 #include <string>
 
-const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+const unsigned int SHADOW_WIDTH = 16384, SHADOW_HEIGHT = 16384;
 
 int WIDTH = 500, HEIGHT = 500;
 
@@ -61,6 +61,13 @@ namespace models {
 	Core::RenderContext plant1DirtContext;
 	Core::RenderContext plant1PotContext;
 
+	Core::RenderContext defaultTerrainContext;
+	Core::RenderContext algae1Context;
+	Core::RenderContext algae2Context;
+	Core::RenderContext algae3Context;
+
+	Core::RenderContext glassWindowContext;
+
 }
 
 namespace texture {
@@ -89,6 +96,11 @@ namespace texture {
 	GLuint plant1Texture;
 	GLuint plant1DirtTexture;
 	GLuint plant1PotTexture;
+
+	GLuint defaultTerrainTexture;
+	GLuint algaeTexture;
+
+	GLuint glassWindowTexture;
 
 }
 
@@ -390,7 +402,19 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 	drawObjectDepth(models::doorhandleContext, lightVP, glm::mat4());
 	drawObjectDepth(models::door_next_toContext, lightVP, glm::mat4());
 	drawObjectDepth(models::door_next_to_doorhandleContext, lightVP, glm::mat4());
+	drawObjectDepth(models::defaultTerrainContext, lightVP, glm::mat4());
 
+	glm::vec3 spaceshipSide = glm::normalize(glm::cross(spaceshipDir, glm::vec3(0.f, 1.f, 0.f)));
+	glm::vec3 spaceshipUp = glm::normalize(glm::cross(spaceshipSide, spaceshipDir));
+	glm::mat4 specshipCameraRotrationMatrix = glm::mat4({
+	  spaceshipSide.x,spaceshipSide.y,spaceshipSide.z,0,
+	  spaceshipUp.x,spaceshipUp.y,spaceshipUp.z ,0,
+	  -spaceshipDir.x,-spaceshipDir.y,-spaceshipDir.z,0,
+	  0.,0.,0.,1.,
+		});
+
+	drawObjectDepth(shipContext, lightVP,
+		glm::translate(spaceshipPos) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.03f)));
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -570,7 +594,7 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 10);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f, 0);
-	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f, 5);
 	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishRedTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f, 0);
@@ -583,13 +607,23 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::plant1DirtContext, glm::mat4(), texture::plant1DirtTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::plant1PotContext, glm::mat4(), texture::plant1PotTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::plant1Context, glm::mat4(), texture::plant1Texture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::defaultTerrainContext, glm::mat4(), texture::defaultTerrainTexture, 0.5f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::algae1Context, glm::mat4(), texture::algaeTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::algae2Context, glm::mat4(), texture::algaeTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::algae3Context, glm::mat4(), texture::algaeTexture, 0.5f, 0.0f, 0);
 
 
 	//objects with textures that contain transparency should be drawn here (last)
 	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
 	drawObjectPBRWithTexture(models::aquariumContext, glm::mat4(), texture::aquariumTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::glassWindowContext, glm::mat4(), texture::glassWallTexture, 0.5f, 0.0f, 5);
+
+
 
 	
+	//Terraingen();
+	
+
 
 	//test depth buffer
 	/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -669,6 +703,13 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/plant1dirt.obj", models::plant1DirtContext);
 	loadModelToContext("./models/plant1pot.obj", models::plant1PotContext);
 
+	loadModelToContext("./models/default_terrain.obj", models::defaultTerrainContext);
+	loadModelToContext("./models/algae1.obj", models::algae1Context);
+	loadModelToContext("./models/algae2.obj", models::algae2Context);
+	loadModelToContext("./models/algae3.obj", models::algae3Context);
+	loadModelToContext("./models/glassWindow.obj", models::glassWindowContext);
+
+
 	//loading textures
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -698,6 +739,8 @@ void init(GLFWwindow* window)
 	texture::plant1Texture = Core::LoadTexture("textures/plant1.jpg");
 	texture::plant1DirtTexture = Core::LoadTexture("textures/plant1dirt.jpg");
 	texture::plant1PotTexture = Core::LoadTexture("textures/plant1pot.jpg");
+	texture::defaultTerrainTexture = Core::LoadTexture("textures/plant1dirt.jpg");
+	texture::algaeTexture = Core::LoadTexture("textures/algae.jpg");
 	//
 	
 	//prepering skybox
@@ -797,36 +840,48 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
-	//float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
+	//float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
+	float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipDir * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos - spaceshipDir * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		spaceshipDir = glm::vec3(glm::eulerAngleY(angleSpeed) * glm::vec4(spaceshipDir, 0));
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		spaceshipDir = glm::vec3(glm::eulerAngleY(-angleSpeed) * glm::vec4(spaceshipDir, 0));
 	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipSide * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos - spaceshipSide * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipUp * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos - spaceshipUp * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 
 	/*
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
