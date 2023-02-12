@@ -61,6 +61,10 @@ void main()
 		vecTex = vertexTexCoord * vec2(15,15);
 		vecTex.y = 1.0 - vecTex.y;
 	}
+	else if(size == 7){
+		vecTex = vertexTexCoord * vec2(20,40);
+		vecTex.y = 1.0 - vecTex.y;
+	}
 	else if(size == 10){
 		vecTex = vertexTexCoord * vec2(150,150);
 		vecTex.y = 1.0 - vecTex.y;

@@ -57,6 +57,10 @@ namespace models {
 
 	Core::RenderContext aquariumContext;
 
+	Core::RenderContext plant1Context;
+	Core::RenderContext plant1DirtContext;
+	Core::RenderContext plant1PotContext;
+
 }
 
 namespace texture {
@@ -68,9 +72,11 @@ namespace texture {
 	GLuint fishGreenTexture;
 	GLuint sofaTexture;
 	GLuint sofaBaseTexture;
+
 	GLuint door1Texture;
 	GLuint door2Texture;
 	GLuint door3Texture;
+
 	GLuint doorhandleTexture;
 	GLuint glassWallTexture;
 	GLuint landTexture;
@@ -79,6 +85,11 @@ namespace texture {
 	GLuint door_next_to_doorhandleTexture;
 	GLuint aquariumTexture;
 	GLuint spaceshipTexture;
+
+	GLuint plant1Texture;
+	GLuint plant1DirtTexture;
+	GLuint plant1PotTexture;
+
 }
 
 GLuint depthMapFBO;
@@ -275,7 +286,7 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 	glUniform1f(glGetUniformLocation(program, "spotlightPhi"), spotlightPhi);
 
 	//For shadows
-	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(program, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(program, "depthMap"), 2);
 	glActiveTexture(GL_TEXTURE0 + 2);
@@ -324,7 +335,7 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform1f(glGetUniformLocation(programTex, "spotlightPhi"), spotlightPhi);
 
 	//For shadows
-	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(programTex, "depthMap"), 2);
 	glActiveTexture(GL_TEXTURE0 + 2);
@@ -435,7 +446,7 @@ void renderScene(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 	//
 
-	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, -1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
+	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	
 	renderShadowapSun(depthMapFBO, lightVP);
 
@@ -534,7 +545,7 @@ void renderScene(GLFWwindow* window)
 
 	if (animal_in_box) {
 		drawObjectPBRWithTexture(models::fish2Context,
-			glm::translate(glm::vec3(-6.55f, 1.22f, 1.11f)) 
+			glm::translate(glm::vec3(-6.55f, 1.22f, 0.61f)) 
 			* glm::rotate(glm::radians(sin(time) * 15.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::radians(sin(-time) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)) 
 			* glm::translate(glm::vec3(0.0f, 0.05f * sin(1.0f * time), 0.0f)) * glm::scale(glm::vec3(0.5f)),
 			texture::fishRedTexture,
@@ -554,7 +565,7 @@ void renderScene(GLFWwindow* window)
 	);
 
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f,5);
-	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 7);
 	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 10);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f, 0);
@@ -569,6 +580,9 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::door_next_toContext, glm::mat4(), texture::door_next_toTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door_next_to_doorhandleContext, glm::mat4(), texture::door_next_to_doorhandleTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::spaceshipContext, glm::mat4(), texture::spaceshipTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::plant1DirtContext, glm::mat4(), texture::plant1DirtTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::plant1PotContext, glm::mat4(), texture::plant1PotTexture, 0.5f, 0.0f, 0);
+	drawObjectPBRWithTexture(models::plant1Context, glm::mat4(), texture::plant1Texture, 0.5f, 0.0f, 0);
 
 
 	//objects with textures that contain transparency should be drawn here (last)
@@ -651,6 +665,10 @@ void init(GLFWwindow* window)
 
 	loadModelToContext("./models/aquarium.obj", models::aquariumContext);
 
+	loadModelToContext("./models/plant1.obj", models::plant1Context);
+	loadModelToContext("./models/plant1dirt.obj", models::plant1DirtContext);
+	loadModelToContext("./models/plant1pot.obj", models::plant1PotContext);
+
 	//loading textures
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -664,7 +682,7 @@ void init(GLFWwindow* window)
 	texture::fishRedTexture = Core::LoadTexture("textures/fish_red.png");
 	texture::fishBlueTexture = Core::LoadTexture("textures/fish_blue.png");
 	texture::fishGreenTexture = Core::LoadTexture("textures/fish_green.png");
-	texture::roomTexture = Core::LoadTexture("textures/roof.jpg");
+	texture::roomTexture = Core::LoadTexture("textures/wall.jpg");
 	texture::sofaBaseTexture = Core::LoadTexture("textures/sofaa.jpg");
 	texture::sofaTexture = Core::LoadTexture("textures/sofaa.jpg");
 	texture::landTexture = Core::LoadTexture("textures/grass.jpg");
@@ -677,6 +695,9 @@ void init(GLFWwindow* window)
 	texture::door_next_toTexture = Core::LoadTexture("textures/Door.jpg");
 	texture::door_next_to_doorhandleTexture = Core::LoadTexture("textures/Door.jpg");
 	texture::spaceshipTexture = Core::LoadTexture("textures/spaceship.png");
+	texture::plant1Texture = Core::LoadTexture("textures/plant1.jpg");
+	texture::plant1DirtTexture = Core::LoadTexture("textures/plant1dirt.jpg");
+	texture::plant1PotTexture = Core::LoadTexture("textures/plant1pot.jpg");
 	//
 	
 	//prepering skybox
@@ -730,7 +751,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		if (spaceshipPos.x >= -6.57f && spaceshipPos.x <= -5.67f &&
 			spaceshipPos.y >= 0.65f && spaceshipPos.y <= 1.75f &&
-			spaceshipPos.z >= 0.27f && spaceshipPos.z <= 1.67f) {
+			spaceshipPos.z >= -0.3f && spaceshipPos.z <= 1.f) {
 			if (animal_in_box) {
 				printf("animal in hand\n");
 				animal_in_box = false;
@@ -831,9 +852,9 @@ void processInput(GLFWwindow* window)
 	cameraDir = spaceshipDir;
 
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-		exposition -= 0.05;
+		exposition -= 0.001;
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-		exposition += 0.05;
+		exposition += 0.001;
 
 	glfwSetKeyCallback(window, key_callback);
 

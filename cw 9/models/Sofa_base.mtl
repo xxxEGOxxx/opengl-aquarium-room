@@ -1,12 +1,12 @@
 # Blender 3.4.1 MTL File: 'Akwarium_room.blend'
 # www.blender.org
 
-newmtl Material_Wool.jpg.001
-Ns 0.000000
+newmtl Material_Wool.jpg
+Ns 96.078453
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 1.450000
+Ni 1.000000
 d 1.000000
-illum 1
+illum 2
+map_Kd F:/Blander/g4jmqcp3hjwg-Sofa/Wool.jpg
