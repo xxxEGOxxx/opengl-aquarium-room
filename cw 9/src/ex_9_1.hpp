@@ -384,9 +384,9 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 
 	drawObjectDepth(models::sofaBaseContext, lightVP, glm::mat4());
 	drawObjectDepth(models::sofaContext, lightVP, glm::mat4());
-	drawObjectDepth(models::fishContext, lightVP, glm::mat4());
+	//drawObjectDepth(models::fishContext, lightVP, glm::mat4());
 	drawObjectDepth(models::fish2Context, lightVP, glm::mat4());
-	drawObjectDepth(models::fish3Context, lightVP, glm::mat4());
+	//drawObjectDepth(models::fish3Context, lightVP, glm::mat4());
 	drawObjectDepth(models::shelfContext, lightVP, glm::mat4());
 	drawObjectDepth(models::pencilsContext, lightVP, glm::mat4());
 	drawObjectDepth(models::aquariumContext, lightVP, glm::mat4());
@@ -417,6 +417,36 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 	drawObjectDepth(shipContext, lightVP,
 		glm::translate(spaceshipPos) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.03f)));
 	
+	if (animal_in_aquarium) drawObjectDepth(models::fish2Context, lightVP, glm::translate(glm::vec3(3.f, 1.25f, 0.0f))
+		* glm::rotate(glm::radians(sin(time) * 10.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.5f, 0, 0))
+		* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, sin(time / 3), 0)) * glm::translate(glm::vec3(0, 0, 0))
+		* glm::scale(glm::vec3(0.5f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+		);
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	drawObjectDepth(models::fish2Context, lightVP, glm::translate(glm::vec3(3.f, 1.0f, 0.45f))
+		* glm::rotate(glm::radians(sin(time / 2) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time - 12) * glm::translate(glm::vec3(1.2f, 0, 0))
+		* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+	);
+	drawObjectDepth(models::fish2Context, lightVP, glm::translate(glm::vec3(2.75f, 1.3f, -0.2f))
+		* glm::rotate(glm::radians(sin(time - 32) * 2.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.5f, 0, 0))
+		* glm::eulerAngleY(time + 41) * glm::translate(glm::vec3(0.3f, sin(time / 3), 0)) * glm::translate(glm::vec3(0, 0, 0))
+		* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+	);
+	drawObjectDepth(models::fish2Context, lightVP, glm::translate(glm::vec3(3.f, 1.25f, -0.42f))
+		* glm::rotate(glm::radians(sin(time) * 2.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time - 47) * glm::translate(glm::vec3(0.5f, 0, 0))
+		* glm::eulerAngleY(time + 25) * glm::translate(glm::vec3(0.25f, sin(time / 3), 0)) * glm::translate(glm::vec3(0, 0, 0))
+		* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+	);
+	drawObjectDepth(models::fish2Context, lightVP, glm::translate(glm::vec3(2.78f, 0.7f, -0.3f))
+		* glm::rotate(glm::radians(sin(time / 2 + 23) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time - 11) * glm::translate(glm::vec3(1.2f, 0, 0))
+		* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+		);
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, WIDTH, HEIGHT);
 }
@@ -537,6 +567,43 @@ void renderScene(GLFWwindow* window)
 	//drawObjectPBR(models::fishContext, glm::mat4(), glm::vec3(0.7f, 0.2f, 0.1f), 0.5f, 0.0f);
 	//drawObjectPBR(models::glassWallContext, glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f);
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	drawObjectPBRWithTexture(models::fish2Context,
+		glm::translate(glm::vec3(3.f, 1.0f, 0.45f))
+		* glm::rotate(glm::radians(sin(time/2) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time - 12)* glm::translate(glm::vec3(1.2f, 0, 0))
+		* glm::scale(glm::vec3(0.2f))* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+		texture::fishBlueTexture,
+		0.5f, 0.0f, 0);
+	
+	drawObjectPBRWithTexture(models::fish2Context,
+		glm::translate(glm::vec3(2.75f, 1.3f, -0.2f))
+		* glm::rotate(glm::radians(sin(time -32) * 2.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time)* glm::translate(glm::vec3(1.5f, 0, 0))
+		* glm::eulerAngleY(time+41)* glm::translate(glm::vec3(0.3f, sin(time / 3), 0)) * glm::translate(glm::vec3(0, 0, 0))
+		* glm::scale(glm::vec3(0.2f))* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+		texture::fishBlueTexture,
+		0.5f, 0.0f, 0);
+	
+	drawObjectPBRWithTexture(models::fish2Context,
+		glm::translate(glm::vec3(3.f, 1.25f, -0.42f))
+		* glm::rotate(glm::radians(sin(time) * 2.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time - 47)* glm::translate(glm::vec3(0.5f, 0, 0))
+		* glm::eulerAngleY(time + 25)* glm::translate(glm::vec3(0.25f, sin(time / 3), 0))* glm::translate(glm::vec3(0, 0, 0))
+		* glm::scale(glm::vec3(0.2f))* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+		texture::fishGreenTexture,
+		0.5f, 0.0f, 0);
+
+	drawObjectPBRWithTexture(models::fish2Context,
+		glm::translate(glm::vec3(2.78f, 0.7f, -0.3f))
+		* glm::rotate(glm::radians(sin(time / 2 + 23) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::eulerAngleY(time - 11)* glm::translate(glm::vec3(1.2f, 0, 0))
+		* glm::scale(glm::vec3(0.2f))* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+		texture::fishGreenTexture,
+		0.5f, 0.0f, 0);
+		
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 	glm::vec3 spaceshipSide = glm::normalize(glm::cross(spaceshipDir, glm::vec3(0.f, 1.f, 0.f)));
 	glm::vec3 spaceshipUp = glm::normalize(glm::cross(spaceshipSide, spaceshipDir));
@@ -551,21 +618,18 @@ void renderScene(GLFWwindow* window)
 		drawObjectPBRWithTexture(models::fish2Context,
 			 glm::translate(spaceshipPos) * glm::translate(glm::vec3(0, 0.06f, 0)) * specshipCameraRotrationMatrix * glm::eulerAngleY(glm::pi<float>()) * glm::scale(glm::vec3(0.5f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, 0, 1)),
 			texture::fishRedTexture,
-			0.5f, 0.0f, 0
-		);
+			0.5f, 0.0f, 0);
 	}
 
 	if (animal_in_aquarium) {
 		drawObjectPBRWithTexture(models::fish2Context,
-			glm::translate(glm::vec3(3.f, 1.25f, 0.0f)) 
+			glm::translate(glm::vec3(3.f, 1.25f, 0.0f))
 			* glm::rotate(glm::radians(sin(time) * 10.0f), glm::vec3(1.0f, 0.0f, 0.0f))
-			* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.5f, 0, 0)) 
-			* glm::eulerAngleY(time) *glm::translate(glm::vec3(1.f, sin(time/3), 0)) * glm::translate(glm::vec3(0, 0, 0)) 
+			* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.5f, 0, 0))
+			* glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, sin(time / 3), 0)) * glm::translate(glm::vec3(0, 0, 0))
 			* glm::scale(glm::vec3(0.5f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
-
 			texture::fishRedTexture,
-			0.5f, 0.0f, 0
-		);
+			0.5f, 0.0f, 0);
 	}
 
 	if (animal_in_box) {
@@ -574,8 +638,7 @@ void renderScene(GLFWwindow* window)
 			* glm::rotate(glm::radians(sin(time) * 15.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::radians(sin(-time) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f)) 
 			* glm::translate(glm::vec3(0.0f, 0.05f * sin(1.0f * time), 0.0f)) * glm::scale(glm::vec3(0.5f)),
 			texture::fishRedTexture,
-			0.5f, 0.0f, 0
-		);
+			0.5f, 0.0f, 0);
 	}
 
 	spotlightPos = spaceshipPos + 0.2 * spaceshipDir;
@@ -591,13 +654,13 @@ void renderScene(GLFWwindow* window)
 
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f,5);
 	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 7);
-	drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
+	//drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 10);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f, 5);
-	drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishRedTexture, 0.5f, 0.0f, 0);
-	drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
+	//drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishRedTexture, 0.5f, 0.0f, 0);
+	//drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door2Context, glm::mat4(), texture::door2Texture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door3Context, glm::mat4(), texture::door3Texture, 0.5f, 0.0f, 0);
