@@ -776,36 +776,48 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
-	//float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
+	//float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
+	float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipDir * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos - spaceshipDir * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		spaceshipDir = glm::vec3(glm::eulerAngleY(angleSpeed) * glm::vec4(spaceshipDir, 0));
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		spaceshipDir = glm::vec3(glm::eulerAngleY(-angleSpeed) * glm::vec4(spaceshipDir, 0));
 	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipSide * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos - spaceshipSide * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipUp * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos - spaceshipUp * moveSpeed;
-		if (newPos.x > minX && newPos.x < maxX && newPos.y > minY && newPos.y < maxY && newPos.z > minZ && newPos.z < maxZ) {
-			spaceshipPos = newPos;}}
+		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
+		if (newPos.y > minY && newPos.y < maxY) spaceshipPos.y = newPos.y;
+		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
+	}
 
 	/*
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
