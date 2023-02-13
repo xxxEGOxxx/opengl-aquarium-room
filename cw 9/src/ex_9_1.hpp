@@ -4,6 +4,7 @@
 #include "ext.hpp"
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 #include "Shader_Loader.h"
 #include "Render_Utils.h"
@@ -82,6 +83,9 @@ namespace models {
 
 	Core::RenderContext glassWindowContext;
 
+
+	//Procedurally Generated Terrain
+	Core::RenderContext ProcedurallyGT;
 }
 
 namespace texture {
@@ -218,6 +222,132 @@ std::string facesCubemap[6] =
 	"./textures/skybox/space_ft.png",
 	"./textures/skybox/space_bk.png"
 };
+
+
+
+std::vector<glm::vec3> vertices;
+std::vector<unsigned int> indices;
+std::vector<glm::vec3> normals;
+
+// Generate the terrain mesh
+void Terraingen() {
+	//TODO offset
+	const int size = 128;
+	const float scaleA = 0.012f;
+	const float scaleB = 0.08f;
+
+
+	for (int x = 0; x < size; x++)
+	{
+		for (int y = 0; y < size; y++)
+		{
+
+			//Generating noise for point based on time
+			float noise = glm::simplex(glm::vec2(
+				(x - size / 2) * scaleA,
+				(y - size / 2) * scaleA
+			));
+			//<-1,1> ~> <0,1>
+			noise = (noise + 1) / 2;
+			//x, y, z of a point
+			vertices.push_back(glm::vec3(
+				((x - size / 2) * scaleB)+5,
+				((noise * 1.2f)-0.65f),
+				(y - size / 2) * scaleB
+			));
+		}
+	}
+
+
+
+	//127 iterations not 128
+	for (int x = 0; x < size - 1; x++)
+	{
+		for (int y = 0; y < size - 1; y++)
+		{
+			unsigned int i1 = x * size + y;
+			unsigned int i2 = (x + 1) * size + y;
+			unsigned int i3 = x * size + y + 1;
+			unsigned int i4 = (x + 1) * size + y + 1;
+			// 1 5 .`
+			// 2 .`  5
+			// .`  2 6  (for grid 4x4)
+
+			// i1 i2 .`
+			// i3  .`  i2
+			//   .` i3 i4
+			indices.push_back(i1);
+			indices.push_back(i2);
+			indices.push_back(i3);
+
+			indices.push_back(i2);
+			indices.push_back(i4);
+			indices.push_back(i3);
+		}
+	}
+
+	//Generate normals
+
+	// Get the vertices of each triangle in mesh
+	// For each group of indices
+	glm::vec3 U, V;
+	for (int i = 0; i < indices.size(); i += 3) {
+
+		glm::vec3 a = vertices[indices[i]];
+		glm::vec3 b = vertices[indices[i + 1]];
+		glm::vec3 c = vertices[indices[i + 2]];
+
+		// Get vectors of two edges of triangle
+		U = b - a;
+		V = c - a;
+		//Append the normalized cross product
+		normals.push_back(glm::normalize(-glm::cross(U, V)));
+		U = a - b;
+		V = c - b;
+		normals.push_back(glm::normalize(glm::cross(U, V)));
+		U = b - c;
+		V = a - c;
+		normals.push_back(glm::normalize(glm::cross(U, V)));
+		//Total of 3 normals / triangle
+	}
+
+
+}
+
+//A function to write terrain into a file
+void WriteOBJ(const std::string& GeneratedTerrain) {
+	// Open the output file
+	std::ofstream outFile(GeneratedTerrain);
+	if (!outFile.is_open()) {
+		// Handle error
+		printf("COULDNT OPEN FILE");
+		return;
+	}
+
+	// Write the vertices
+	for (const auto& vertex : vertices) {
+		outFile << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
+	}
+
+	// Write the normals
+	for (const auto& normal : normals) {
+		outFile << "vn " << normal.x << " " << normal.y << " " << normal.z << std::endl;
+	}
+
+	// Write the indices
+	for (int i = 0; i < indices.size(); i += 3) {
+		outFile
+			<< "f " << indices[i] + 1 << "//" << i + 1 << " "
+			<< indices[i + 1] + 1 << "//" << i + 2 << " "
+			<< indices[i + 2] + 1 << "//" << i + 3 << std::endl;
+	}
+
+	// Close the output file
+	outFile.close();
+}
+
+
+
 
 
 
@@ -549,6 +679,7 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 	drawObjectDepth(models::door_next_toContext, lightVP, glm::mat4());
 	drawObjectDepth(models::door_next_to_doorhandleContext, lightVP, glm::mat4());
 	drawObjectDepth(models::defaultTerrainContext, lightVP, glm::mat4());
+	drawObjectDepth(models::ProcedurallyGT, lightVP, glm::mat4());
 
 	glm::vec3 spaceshipSide = glm::normalize(glm::cross(spaceshipDir, glm::vec3(0.f, 1.f, 0.f)));
 	glm::vec3 spaceshipUp = glm::normalize(glm::cross(spaceshipSide, spaceshipDir));
@@ -723,6 +854,7 @@ void renderScene(GLFWwindow* window)
 	//drawObjectPBR(models::door3Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 
 	drawObjectPBR(models::shelfContext, glm::mat4(), glm::vec3(0.2f, 0.2f, 0.2f), 0.5f, 0.0f);
+	drawObjectPBR(models::ProcedurallyGT, glm::mat4(), glm::vec3(0.2f, 0.6f, 1.0f), 0.5f, 0.0f);
 	//drawObjectPBR(models::landContext, glm::mat4(), glm::vec3(0.5f, 0.5f, 0.1f), 0.5f, 0.0f);
 
 	//drawObjectPBR(models::fishContext, glm::mat4(), glm::vec3(0.7f, 0.2f, 0.1f), 0.5f, 0.0f);
@@ -905,6 +1037,10 @@ void init(GLFWwindow* window)
 
 	initDepthMap();
 
+	Terraingen();
+	std::string GeneratedTerrain = "models/GeneratedTerrain.obj";
+	WriteOBJ(GeneratedTerrain);
+
 	glEnable(GL_DEPTH_TEST);
 	program = shaderLoader.CreateProgram("shaders/shader_9_1.vert", "shaders/shader_9_1.frag");
 	programTest = shaderLoader.CreateProgram("shaders/test.vert", "shaders/test.frag");
@@ -951,6 +1087,8 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/algae2.obj", models::algae2Context);
 	loadModelToContext("./models/algae3.obj", models::algae3Context);
 	loadModelToContext("./models/glassWindow.obj", models::glassWindowContext);
+
+	loadModelToContext("./models/GeneratedTerrain.obj", models::ProcedurallyGT);
 
 
 	//loading textures
@@ -1023,6 +1161,23 @@ void init(GLFWwindow* window)
 		);
 	}
 	//
+
+
+		/*
+	glGenVertexArrays(1, &TerrainVAO);
+	glGenBuffers(1, &TerrainVBO);
+	glGenBuffers(1, &TerrainIBO);
+	glBindVertexArray(TerrainVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, TerrainVBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, TerrainIBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	*/
 }
 
 void shutdown(GLFWwindow* window)
@@ -1083,8 +1238,8 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	//float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
-	float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
+	float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
+	//float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipDir * moveSpeed;
 		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
