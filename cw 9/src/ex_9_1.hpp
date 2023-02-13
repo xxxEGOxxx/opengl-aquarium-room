@@ -21,14 +21,13 @@
 #include <glut.h>
 
 
-const int DEPTH = 100;
-const int NUM_BOIDS = 20;
+const int NUM_BOIDS = 40;
 const float BOID_SIZE = 0.05f;
 const float MAX_SPEED = 0.02f;
 const float NEIGHBOR_RADIUS = 0.1f;
-const float SEPARATION_WEIGHT = 1.0f;
+const float SEPARATION_WEIGHT = 0.7f;
 const float ALIGNMENT_WEIGHT = 1.0f;
-const float COHESION_WEIGHT = 1.0f;
+const float COHESION_WEIGHT = 5.0f;
 
 //const unsigned int SHADOW_WIDTH = 16384, SHADOW_HEIGHT = 16384;
 const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
@@ -138,7 +137,6 @@ Core::Shader_Loader shaderLoader;
 Core::RenderContext shipContext;
 Core::RenderContext sphereContext;
 
-//glm::vec3 sunPos = glm::vec3(-4.740971f, 1.149999f, 0.369280f);
 glm::vec3 sunPos = glm::vec3(-9.5, 4, -5);
 glm::vec3 sunDir = glm::vec3(-1.93633f, 0.351106, -1.003226f);
 glm::vec3 sunColor = glm::vec3(0.9f, 0.6f, 0.7f) * 1.15;
@@ -202,17 +200,6 @@ unsigned int skyboxIndices[] =
 	6, 2, 3
 };
 
-/*
-std::string facesCubemap[6] =
-{
-	"./textures/skybox/rt.png",
-	"./textures/skybox/lt.png",
-	"./textures/skybox/tp.png",
-	"./textures/skybox/bm.png",
-	"./textures/skybox/ft.png",
-	"./textures/skybox/bk.png"
-};
-*/
 std::string facesCubemap[6] =
 {
 	"./textures/skybox/space_lf.png",
@@ -231,7 +218,6 @@ std::vector<glm::vec3> normals;
 
 // Generate the terrain mesh
 void Terraingen() {
-	//TODO offset
 	const int size = 128;
 	const float scaleA = 0.012f;
 	const float scaleB = 0.08f;
@@ -288,8 +274,8 @@ void Terraingen() {
 
 	//Generate normals
 
-	// Get the vertices of each triangle in mesh
-	// For each group of indices
+	//Get the vertices of each triangle in mesh
+	//For each group of indices
 	glm::vec3 U, V;
 	for (int i = 0; i < indices.size(); i += 3) {
 
@@ -297,7 +283,7 @@ void Terraingen() {
 		glm::vec3 b = vertices[indices[i + 1]];
 		glm::vec3 c = vertices[indices[i + 2]];
 
-		// Get vectors of two edges of triangle
+		//Get vectors of two edges of triangle
 		U = b - a;
 		V = c - a;
 		//Append the normalized cross product
@@ -313,7 +299,7 @@ void Terraingen() {
 
 
 }
-// code with chatGPT help
+//function with chatGPT help
 //A function to write terrain into a file
 void WriteOBJ(const std::string& GeneratedTerrain) {
 	// Open the output file
@@ -354,7 +340,6 @@ void WriteOBJ(const std::string& GeneratedTerrain) {
 unsigned int cubemapTexture;
 
 unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
-//
 
 bool animal_in_box = true;
 bool animal_in_hand = false;
@@ -391,10 +376,9 @@ void initBoids()
 	for (int i = 0; i < NUM_BOIDS; i++)
 	{
 		Boid b;
-		//b.x = float(rand()) / RAND_MAX * 2 - 1;
-		b.x = 12;
-		b.y = 1;
-		b.z = 4;
+		b.x = 0;
+		b.y = 0;
+		b.z = 0;
 		b.vx = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
 		b.vy = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
 		b.vz = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
@@ -461,6 +445,7 @@ void updateBoid(Boid& b) {
 	b.y += b.vy;
 	b.z += b.vz;
 
+	
 	if (b.x < -1.0f) {
 		b.vx = abs(b.vx);
 	}
@@ -479,30 +464,8 @@ void updateBoid(Boid& b) {
 	if (b.z > 5.0f) {
 		b.vz = -abs(b.vz);
 	}
-
+	
 }
-
-
-/*
-void renderBoids()
-{
-	float time = glfwGetTime();
-	for (int i = 0; i < NUM_BOIDS; i++)
-	{
-
-		float x = boids[i].x;
-		float y = boids[i].y;
-		float z = boids[i].z;
-
-		drawObjectPBRWithTexture(models::fish2Context,
-			glm::translate(glm::vec3(3.f, 1.0f, 0.45f))
-			* glm::rotate(glm::radians(sin(time / 2) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
-			* glm::eulerAngleY(time - 12) * glm::translate(glm::vec3(1.2f, 0, 0))
-			* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
-			texture::fishBlueTexture,
-			0.5f, 0.0f, 0);
-	}
-}*/
 
 
 glm::mat4 createCameraMatrix()
@@ -573,12 +536,13 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 	glUniform3f(glGetUniformLocation(program, "spotlightColor"), spotlightColor.x, spotlightColor.y, spotlightColor.z);
 	glUniform1f(glGetUniformLocation(program, "spotlightPhi"), spotlightPhi);
 
-	// code with chatGPT help
+	//code with chatGPT help
 	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(program, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(program, "depthMap"), 2);
 	glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
+	//
 
 	Core::DrawContext(context);
 
@@ -622,12 +586,13 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform3f(glGetUniformLocation(programTex, "spotlightColor"), spotlightColor.x, spotlightColor.y, spotlightColor.z);
 	glUniform1f(glGetUniformLocation(programTex, "spotlightPhi"), spotlightPhi);
 
-	// code with chatGPT help
+	//code with chatGPT help
 	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(programTex, "depthMap"), 2);
 	glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
+	//
 
 	Core::SetActiveTexture(textureID, "colorTexture", programTex, 0);
 	Core::DrawContext(context);
@@ -645,23 +610,16 @@ void drawObjectDepth(Core::RenderContext context, glm::mat4 viewProjectionMatrix
 void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 	float time = glfwGetTime();
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	//uzupelnij o renderowanie glebokosci do tekstury
 	glUseProgram(programDepth);
 
-	//ustawianie przestrzeni rysowania 
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	//bindowanie FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	//czyszczenie mapy głębokości 
 	glClear(GL_DEPTH_BUFFER_BIT);
-	//ustawianie programu
 	glUseProgram(programDepth);
 
 	drawObjectDepth(models::sofaBaseContext, lightVP, glm::mat4());
 	drawObjectDepth(models::sofaContext, lightVP, glm::mat4());
-	//drawObjectDepth(models::fishContext, lightVP, glm::mat4());
 	drawObjectDepth(models::fish2Context, lightVP, glm::mat4());
-	//drawObjectDepth(models::fish3Context, lightVP, glm::mat4());
 	drawObjectDepth(models::shelfContext, lightVP, glm::mat4());
 	drawObjectDepth(models::pencilsContext, lightVP, glm::mat4());
 	drawObjectDepth(models::aquariumContext, lightVP, glm::mat4());
@@ -722,7 +680,7 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 		* glm::eulerAngleY(time - 11) * glm::translate(glm::vec3(1.2f, 0, 0))
 		* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
 		);
-
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < NUM_BOIDS; i++)
 	{
 
@@ -731,13 +689,11 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 		float z = boids[i].z;
 
 		drawObjectDepth(models::fish2Context, lightVP,
-			glm::translate(glm::vec3(x, y, z))
-		//*glm::rotate(glm::radians(sin(time / 2 + 23) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
-			//* glm::eulerAngleY(time - 11)* glm::translate(glm::vec3(1.2f, 0, 0))
-			//* glm::scale(glm::vec3(0.2f))* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+		glm::translate(glm::vec3(x, y, z)) * glm::translate(glm::vec3(2.0f, 1.25f, 0.f))
+			* glm::scale(glm::vec3(0.2f))
 			);
 	}
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	glViewport(0, 0, WIDTH, HEIGHT);
@@ -772,7 +728,6 @@ void renderScene(GLFWwindow* window)
 	float time = glfwGetTime();
 	updateDeltaTime(time);
 
-	//drawing skybox
 	glDepthFunc(GL_LEQUAL);
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
@@ -791,15 +746,13 @@ void renderScene(GLFWwindow* window)
 	glDepthFunc(GL_LESS);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-	//
-	// code with chatGPT help
+
+	//code with chatGPT help
 	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	//
 	renderShadowapSun(depthMapFBO, lightVP);
 
-	//space lamp
 	glUseProgram(programSun);
-	//glm::mat4 viewProjectionMatrix = createPerspectiveMatrix() * createCameraMatrix();
 	glm::mat4 transformation = viewProjectionMatrix * glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1));
 	glUniformMatrix4fv(glGetUniformLocation(programSun, "transformation"), 1, GL_FALSE, (float*)&transformation);
 	glUniform3f(glGetUniformLocation(programSun, "color"), lampColor.x / 2, lampColor.y / 2, lampColor.z / 2);
@@ -818,47 +771,14 @@ void renderScene(GLFWwindow* window)
 	glUniform1f(glGetUniformLocation(programSun, "exposition"), exposition);
 	Core::DrawContext(sphereContext);
 
-
 	glUseProgram(program);
 
-	/*
-	drawObjectPBR(sphereContext,
-		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::scale(glm::vec3(0.3f)),
-		glm::vec4(0.2, 0.7, 0.3, 0), 0.3, 0.0);
-
-	drawObjectPBR(sphereContext,
-		glm::translate(pointlightPos) * glm::scale(glm::vec3(0.1)) * glm::eulerAngleY(time / 3) * glm::translate(glm::vec3(4.f, 0, 0)) * glm::eulerAngleY(time) * glm::translate(glm::vec3(1.f, 0, 0)) * glm::scale(glm::vec3(0.1f)),
-		glm::vec4(0.5, 0.5, 0.5, 0), 0.7, 0.0);
-	*/
-
-	//drawObjectPBR(models::bedContext, glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f), 0.2f, 0.0f);
-	//drawObjectPBR(models::chairContext, glm::mat4(), glm::vec3(0.195239f, 0.37728f, 0.8f), 0.4f, 0.0f);
 	drawObjectPBR(models::deskContext, glm::mat4(), glm::vec3(0.428691f, 0.08022f, 0.036889f), 0.2f, 0.0f);
-	//drawObjectPBR(models::doorContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 	drawObjectPBR(models::drawerContext, glm::mat4(), glm::vec3(0.428691f, 0.08022f, 0.036889f), 0.2f, 0.0f);
 	drawObjectPBR(models::marbleBustContext, glm::mat4(), glm::vec3(1.f, 1.f, 1.f), 0.5f, 1.0f);
-	//drawObjectPBR(models::materaceContext, glm::mat4(), glm::vec3(0.9f, 0.9f, 0.9f), 0.8f, 0.0f);
 	drawObjectPBR(models::pencilsContext, glm::mat4(), glm::vec3(0.10039f, 0.018356f, 0.001935f), 0.1f, 0.0f);
-
-
-	//drawObjectPBR(models::floorContext, glm::mat4(), glm::vec3(0.5f, 0.5f, 0.5f), 0.2f, 0.0f);
-	
-	//drawObjectPBR(models::roomContext, glm::mat4(), glm::vec3(0.8f, 0.8f, 0.8f), 0.8f, 0.0f);
-	//drawObjectPBR(models::windowContext, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
-
-	//drawObjectPBR(models::sofaContext, glm::mat4(), glm::vec3(0.4f, 0.4f, 0.4f), 0.5f, 1.0f);
-	//drawObjectPBR(models::sofaBaseContext, glm::mat4(), glm::vec3(0.3f, 0.3f, 0.3f), 0.5f, 0.0f);
-
-	//drawObjectPBR(models::door1Context, glm::mat4(), glm::vec3(0.4f, 0.4f, 0.4f), 0.2f, 0.0f);
-	//drawObjectPBR(models::door2Context, glm::mat4(), glm::vec3(0.4f, 0.4f, 0.4f), 0.2f, 0.0f);
-	//drawObjectPBR(models::door3Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
-
 	drawObjectPBR(models::shelfContext, glm::mat4(), glm::vec3(0.2f, 0.2f, 0.2f), 0.5f, 0.0f);
 	drawObjectPBR(models::ProcedurallyGT, glm::mat4(), glm::vec3(1.0f, 1.0f, 0.6f), 0.5f, 0.0f);
-	//drawObjectPBR(models::landContext, glm::mat4(), glm::vec3(0.5f, 0.5f, 0.1f), 0.5f, 0.0f);
-
-	//drawObjectPBR(models::fishContext, glm::mat4(), glm::vec3(0.7f, 0.2f, 0.1f), 0.5f, 0.0f);
-	//drawObjectPBR(models::glassWallContext, glm::mat4(), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	drawObjectPBRWithTexture(models::fish2Context,
@@ -947,13 +867,10 @@ void renderScene(GLFWwindow* window)
 
 	drawObjectPBRWithTexture(models::floorContext, glm::mat4(), texture::floorTexture, 0.8f, 0.0f,5);
 	drawObjectPBRWithTexture(models::roomContext, glm::mat4(), texture::roomTexture, 0.8f, 0.0f, 7);
-	//drawObjectPBRWithTexture(models::fishContext, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::landContext, glm::mat4(), texture::landTexture, 0.5f, 0.0f, 10);
 	drawObjectPBRWithTexture(models::sofaBaseContext, glm::mat4(), texture::sofaBaseTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::sofaContext, glm::mat4(), texture::sofaTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::roofContext, glm::mat4(), texture::roofTexture, 0.5f, 0.0f, 5);
-	//drawObjectPBRWithTexture(models::fish2Context, glm::mat4(), texture::fishRedTexture, 0.5f, 0.0f, 0);
-	//drawObjectPBRWithTexture(models::fish3Context, glm::mat4(), texture::fishTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door1Context, glm::mat4(), texture::door1Texture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door2Context, glm::mat4(), texture::door2Texture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::door3Context, glm::mat4(), texture::door3Texture, 0.5f, 0.0f, 0);
@@ -969,12 +886,6 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::algae2Context, glm::mat4(), texture::algaeTexture, 0.5f, 0.0f, 0);
 	drawObjectPBRWithTexture(models::algae3Context, glm::mat4(), texture::algaeTexture, 0.5f, 0.0f, 0);
 
-
-	//objects with textures that contain transparency should be drawn here (last)
-	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
-	drawObjectPBRWithTexture(models::aquariumContext, glm::mat4(), texture::aquariumTexture, 0.8f, 0.0f, 5);
-	drawObjectPBRWithTexture(models::glassWindowContext, glm::mat4(), texture::glassWallTexture, 0.5f, 0.0f, 5);
-
 	for (int i = 0; i < NUM_BOIDS; i++)
 	{
 
@@ -983,20 +894,20 @@ void renderScene(GLFWwindow* window)
 		float z = boids[i].z;
 
 		drawObjectPBRWithTexture(models::fish2Context,
-			glm::translate(glm::vec3(x, y, z)),
-			//* glm::rotate(glm::radians(sin(time / 2) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
-			//* glm::eulerAngleY(time - 12) * glm::translate(glm::vec3(1.2f, 0, 0))
-			//* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
-			texture::fishGreenTexture,
+			glm::translate(glm::vec3(x, y, z)) * glm::translate(glm::vec3(2.0f, 1.25f, 0.f))
+			* glm::scale(glm::vec3(0.2f))
+			,texture::fishGreenTexture,
 			0.5f, 0.0f, 0);
 	}
 	for (int i = 0; i < NUM_BOIDS; i++) {
 		updateBoid(boids[i]);
 	}
-	//Terraingen();
+
+	//objects with textures that contain transparency should be drawn here (last)
+	drawObjectPBRWithTexture(models::glassWallContext, glm::mat4(), texture::glassWallTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::aquariumContext, glm::mat4(), texture::aquariumTexture, 0.8f, 0.0f, 5);
+	drawObjectPBRWithTexture(models::glassWindowContext, glm::mat4(), texture::glassWallTexture, 0.5f, 0.0f, 5);
 	
-
-
 
 	//test depth buffer
 	/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1047,7 +958,6 @@ void init(GLFWwindow* window)
 	programSun = shaderLoader.CreateProgram("shaders/shader_8_sun.vert", "shaders/shader_8_sun.frag");
 	programDepth = shaderLoader.CreateProgram("shaders/shader_shadow_global_sun.vert", "shaders/shader_shadow_global_sun.frag");
 
-	//loading models 
 	loadModelToContext("./models/sphere.obj", sphereContext);
 	//model created manually
 	loadModelToContext("./models/fighter.obj", shipContext);
@@ -1062,7 +972,6 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/sphere.obj", models::sphereContext);
 	//model created manually
 	loadModelToContext("./models/test.obj", models::testContext);
-
 	//The model is created by modifying the another model
 	loadModelToContext("./models/Sofa_baseCube.obj", models::sofaContext);
 	//The model is created by modifying the another model
@@ -1071,7 +980,6 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/Door2.obj", models::door2Context);
 	loadModelToContext("./models/Door3.obj", models::door3Context);
 	loadModelToContext("./models/DoorCircle.obj", models::doorhandleContext);
-
 	//The model is created by modifying the another model
 	loadModelToContext("./models/Shelf.obj", models::shelfContext);
 	loadModelToContext("./models/fish.obj", models::fishContext);
@@ -1083,20 +991,16 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/land.obj", models::landContext);
 	//model created manually
 	loadModelToContext("./models/roof.obj", models::roofContext);
-
 	loadModelToContext("./models/door_next_to.obj", models::door_next_toContext);
 	loadModelToContext("./models/door_next_to_doorhandle.obj", models::door_next_to_doorhandleContext);
-
 	//model created manually
 	loadModelToContext("./models/aquarium.obj", models::aquariumContext);
-
 	//The model is created by modifying the another model
 	loadModelToContext("./models/plant1.obj", models::plant1Context);
 	//The model is created by modifying the another model
 	loadModelToContext("./models/plant1dirt.obj", models::plant1DirtContext);
 	//model created manually
 	loadModelToContext("./models/plant1pot.obj", models::plant1PotContext);
-
 	//model created manually
 	loadModelToContext("./models/default_terrain.obj", models::defaultTerrainContext);
 	//The model is created by modifying the another model
@@ -1107,7 +1011,6 @@ void init(GLFWwindow* window)
 	loadModelToContext("./models/algae3.obj", models::algae3Context);
 	//model created manually
 	loadModelToContext("./models/glassWindow.obj", models::glassWindowContext);
-
 	//model created manually(by generating)
 	loadModelToContext("./models/GeneratedTerrain.obj", models::ProcedurallyGT);
 
@@ -1120,7 +1023,6 @@ void init(GLFWwindow* window)
 	texture::aquariumTexture = Core::LoadTexture("textures/glass_dark.png");
 	glDisable(GL_BLEND);
 	programTex = shaderLoader.CreateProgram("shaders/shader_texture.vert", "shaders/shader_texture.frag");
-	//texture::glassWallTexture = Core::LoadTexture("textures/glass.jpg");
 	texture::fishTexture = Core::LoadTexture("textures/fish.png");
 	texture::fishRedTexture = Core::LoadTexture("textures/fish_red.png");
 	texture::fishBlueTexture = Core::LoadTexture("textures/fish_blue.png");
@@ -1143,9 +1045,8 @@ void init(GLFWwindow* window)
 	texture::plant1PotTexture = Core::LoadTexture("textures/plant1pot.jpg");
 	texture::defaultTerrainTexture = Core::LoadTexture("textures/plant1dirt.jpg");
 	texture::algaeTexture = Core::LoadTexture("textures/algae.jpg");
-	//
 	
-	//prepering skybox
+	//prepering skybox - code made with help of chatGPT
 	programSkybox = shaderLoader.CreateProgram("shaders/shader_skybox.vert", "shaders/shader_skybox.frag");
 	glUseProgram(programSkybox);
 	glUniform1i(glGetUniformLocation(programSkybox, "skybox"), 0);
@@ -1184,7 +1085,7 @@ void init(GLFWwindow* window)
 	//
 
 
-		/*
+	/*
 	glGenVertexArrays(1, &TerrainVAO);
 	glGenBuffers(1, &TerrainVBO);
 	glGenBuffers(1, &TerrainIBO);
@@ -1259,8 +1160,8 @@ void processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
-	//float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
+	//float minX = -1000.f, maxX = 1000.f, minY = -1000.f, maxY = 1000.f, minZ = -1000.f, maxZ = 1000.f;
+	float minX = -6.f, maxX = -0.47f, minY = 0.65f, maxY = 2.5f, minZ = -4.4f, maxZ = 4.5f;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		glm::vec3 newPos = spaceshipPos + spaceshipDir * moveSpeed;
 		if (newPos.x > minX && newPos.x < maxX) spaceshipPos.x = newPos.x;
@@ -1302,26 +1203,6 @@ void processInput(GLFWwindow* window)
 		if (newPos.z > minZ && newPos.z < maxZ) spaceshipPos.z = newPos.z;
 	}
 
-	/*
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		spaceshipPos += spaceshipDir * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		spaceshipPos -= spaceshipDir * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		spaceshipDir = glm::vec3(glm::eulerAngleY(angleSpeed) * glm::vec4(spaceshipDir, 0));
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		spaceshipDir = glm::vec3(glm::eulerAngleY(-angleSpeed) * glm::vec4(spaceshipDir, 0));
-	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-		spaceshipPos += spaceshipSide * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-		spaceshipPos -= spaceshipSide * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		spaceshipPos += spaceshipUp * moveSpeed;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		spaceshipPos -= spaceshipUp * moveSpeed;
-	*/
-
-
 	cameraPos = spaceshipPos - 0.5 * spaceshipDir + glm::vec3(0, 1, 0) * 0.2f;
 	cameraDir = spaceshipDir;
 
@@ -1331,20 +1212,13 @@ void processInput(GLFWwindow* window)
 		exposition += 0.001;
 
 	glfwSetKeyCallback(window, key_callback);
-
-	//cameraDir = glm::normalize(-cameraPos);
 }
 
 
-// funkcja jest glowna petla
 void renderLoop(GLFWwindow* window) {
 	while (!glfwWindowShouldClose(window))
 	{
 		//glClear(GL_COLOR_BUFFER_BIT);
-
-		//updateBoids();
-		//renderBoids();
-
 		//glfwSwapBuffers(window);
 		processInput(window);
 		renderScene(window);
@@ -1354,4 +1228,3 @@ void renderLoop(GLFWwindow* window) {
 	}
 	
 }
-//}
