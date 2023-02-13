@@ -58,7 +58,9 @@ void main()
 	spotlightDirTS = TBN*SL;
 	sunDirTS = TBN*sunDir;
 	if(size == 5){
+		// code with chatGPT help
 		vecTex = vertexTexCoord * vec2(15,15);
+		//
 		vecTex.y = 1.0 - vecTex.y;
 	}
 	else if(size == 7){

@@ -31,7 +31,7 @@ const float ALIGNMENT_WEIGHT = 1.0f;
 const float COHESION_WEIGHT = 1.0f;
 
 //const unsigned int SHADOW_WIDTH = 16384, SHADOW_HEIGHT = 16384;
-const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
+const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
 
 int WIDTH = 500, HEIGHT = 500;
 
@@ -313,7 +313,7 @@ void Terraingen() {
 
 
 }
-
+// code with chatGPT help
 //A function to write terrain into a file
 void WriteOBJ(const std::string& GeneratedTerrain) {
 	// Open the output file
@@ -345,7 +345,7 @@ void WriteOBJ(const std::string& GeneratedTerrain) {
 	// Close the output file
 	outFile.close();
 }
-
+//
 
 
 
@@ -573,7 +573,7 @@ void drawObjectPBR(Core::RenderContext& context, glm::mat4 modelMatrix, glm::vec
 	glUniform3f(glGetUniformLocation(program, "spotlightColor"), spotlightColor.x, spotlightColor.y, spotlightColor.z);
 	glUniform1f(glGetUniformLocation(program, "spotlightPhi"), spotlightPhi);
 
-	//For shadows
+	// code with chatGPT help
 	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(program, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(program, "depthMap"), 2);
@@ -622,7 +622,7 @@ void drawObjectPBRWithTexture(Core::RenderContext& context, glm::mat4 modelMatri
 	glUniform3f(glGetUniformLocation(programTex, "spotlightColor"), spotlightColor.x, spotlightColor.y, spotlightColor.z);
 	glUniform1f(glGetUniformLocation(programTex, "spotlightPhi"), spotlightPhi);
 
-	//For shadows
+	// code with chatGPT help
 	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(glGetUniformLocation(programTex, "LightVP"), 1, GL_FALSE, (float*)&lightVP);
 	glUniform1i(glGetUniformLocation(programTex, "depthMap"), 2);
@@ -792,9 +792,9 @@ void renderScene(GLFWwindow* window)
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	//
-
+	// code with chatGPT help
 	glm::mat4 lightVP = glm::ortho(-10.f, 10.f, -10.f, 10.f, 1.0f, 40.0f) * glm::lookAt(sunPos, sunPos - sunDir, glm::vec3(0, 1, 0));
-	
+	//
 	renderShadowapSun(depthMapFBO, lightVP);
 
 	//space lamp
@@ -854,7 +854,7 @@ void renderScene(GLFWwindow* window)
 	//drawObjectPBR(models::door3Context, glm::mat4(), glm::vec3(0.402978f, 0.120509f, 0.057729f), 0.2f, 0.0f);
 
 	drawObjectPBR(models::shelfContext, glm::mat4(), glm::vec3(0.2f, 0.2f, 0.2f), 0.5f, 0.0f);
-	drawObjectPBR(models::ProcedurallyGT, glm::mat4(), glm::vec3(0.2f, 0.6f, 1.0f), 0.5f, 0.0f);
+	drawObjectPBR(models::ProcedurallyGT, glm::mat4(), glm::vec3(1.0f, 1.0f, 0.6f), 0.5f, 0.0f);
 	//drawObjectPBR(models::landContext, glm::mat4(), glm::vec3(0.5f, 0.5f, 0.1f), 0.5f, 0.0f);
 
 	//drawObjectPBR(models::fishContext, glm::mat4(), glm::vec3(0.7f, 0.2f, 0.1f), 0.5f, 0.0f);
@@ -1047,47 +1047,68 @@ void init(GLFWwindow* window)
 	programSun = shaderLoader.CreateProgram("shaders/shader_8_sun.vert", "shaders/shader_8_sun.frag");
 	programDepth = shaderLoader.CreateProgram("shaders/shader_shadow_global_sun.vert", "shaders/shader_shadow_global_sun.frag");
 
-	//loading models
+	//loading models 
 	loadModelToContext("./models/sphere.obj", sphereContext);
+	//model created manually
 	loadModelToContext("./models/fighter.obj", shipContext);
 	loadModelToContext("./models/Marble_Bust.obj", models::marbleBustContext);
 	loadModelToContext("./models/Pencils_Cylinder.obj", models::pencilsContext);
+	//model created manually
 	loadModelToContext("./models/plane.obj", models::floorContext);
+	//model created manually
 	loadModelToContext("./models/room.obj", models::roomContext);
 	//loadModelToContext("./models/spaceship.obj", models::spaceshipContext);
+	//model created manually
 	loadModelToContext("./models/sphere.obj", models::sphereContext);
+	//model created manually
 	loadModelToContext("./models/test.obj", models::testContext);
 
+	//The model is created by modifying the another model
 	loadModelToContext("./models/Sofa_baseCube.obj", models::sofaContext);
+	//The model is created by modifying the another model
 	loadModelToContext("./models/Sofa_base.obj", models::sofaBaseContext);
 	loadModelToContext("./models/Door1.obj", models::door1Context);
 	loadModelToContext("./models/Door2.obj", models::door2Context);
 	loadModelToContext("./models/Door3.obj", models::door3Context);
 	loadModelToContext("./models/DoorCircle.obj", models::doorhandleContext);
 
+	//The model is created by modifying the another model
 	loadModelToContext("./models/Shelf.obj", models::shelfContext);
 	loadModelToContext("./models/fish.obj", models::fishContext);
 	loadModelToContext("./models/fish2.obj", models::fish2Context);
 	loadModelToContext("./models/fish3.obj", models::fish3Context);
+	//model created manually
 	loadModelToContext("./models/Glass_wall.obj", models::glassWallContext);
+	//model created manually
 	loadModelToContext("./models/land.obj", models::landContext);
+	//model created manually
 	loadModelToContext("./models/roof.obj", models::roofContext);
 
 	loadModelToContext("./models/door_next_to.obj", models::door_next_toContext);
 	loadModelToContext("./models/door_next_to_doorhandle.obj", models::door_next_to_doorhandleContext);
 
+	//model created manually
 	loadModelToContext("./models/aquarium.obj", models::aquariumContext);
 
+	//The model is created by modifying the another model
 	loadModelToContext("./models/plant1.obj", models::plant1Context);
+	//The model is created by modifying the another model
 	loadModelToContext("./models/plant1dirt.obj", models::plant1DirtContext);
+	//model created manually
 	loadModelToContext("./models/plant1pot.obj", models::plant1PotContext);
 
+	//model created manually
 	loadModelToContext("./models/default_terrain.obj", models::defaultTerrainContext);
+	//The model is created by modifying the another model
 	loadModelToContext("./models/algae1.obj", models::algae1Context);
+	//The model is created by modifying the another model
 	loadModelToContext("./models/algae2.obj", models::algae2Context);
+	//The model is created by modifying the another model
 	loadModelToContext("./models/algae3.obj", models::algae3Context);
+	//model created manually
 	loadModelToContext("./models/glassWindow.obj", models::glassWindowContext);
 
+	//model created manually(by generating)
 	loadModelToContext("./models/GeneratedTerrain.obj", models::ProcedurallyGT);
 
 

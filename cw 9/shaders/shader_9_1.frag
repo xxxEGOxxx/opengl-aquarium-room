@@ -107,17 +107,18 @@ vec3 PBRLight(vec3 lightDir, vec3 radiance, vec3 normal, vec3 V){
 	return (kD * color / PI + specular) * radiance * NdotL;
 }
 
+// code with chatGPT help
 float calculateShadow() {
 
 	vec4 sunSpacePosNormalized =  (0.5 * sunSpacePos / (sunSpacePos.w)) + 0.5;
 
-    float closestDepth = texture2D(depthMap, sunSpacePosNormalized.xy).x;//r?
+    float closestDepth = texture2D(depthMap, sunSpacePosNormalized.xy).x;
 
-    float diff = (0.001+closestDepth) - sunSpacePosNormalized.z;//sunSpacePosNormalized.z;
+    float diff = (0.001+closestDepth) - sunSpacePosNormalized.z;
 
     return (0.5*(diff)/abs(diff))+0.5;
 }
-
+//
 void main()
 {
 	//vec3 normal = vec3(0,0,1);
