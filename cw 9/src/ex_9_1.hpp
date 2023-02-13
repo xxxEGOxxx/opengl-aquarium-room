@@ -220,8 +220,8 @@ std::vector<glm::vec3> normals;
 void Terraingen() {
 	//TODO offset
 	const int size = 128;
-	const float scaleA = 0.01f;
-	const float scaleB = 0.7f;
+	const float scaleA = 0.012f;
+	const float scaleB = 0.08f;
 
 
 	for (int x = 0; x < size; x++)
@@ -234,10 +234,12 @@ void Terraingen() {
 				(x - size / 2) * scaleA,
 				(y - size / 2) * scaleA
 			));
+			//<-1,1> ~> <0,1>
+			noise = (noise + 1) / 2;
 			//x, y, z of a point
 			vertices.push_back(glm::vec3(
-				(x - size / 2) * scaleB,
-				noise * 1,
+				((x - size / 2) * scaleB)+5,
+				((noise * 1.2f)-0.65f),
 				(y - size / 2) * scaleB
 			));
 		}
