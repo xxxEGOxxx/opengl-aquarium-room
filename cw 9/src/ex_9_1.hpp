@@ -379,6 +379,7 @@ void initBoids()
 		b.x = 0;
 		b.y = 0;
 		b.z = 0;
+		// code with chatGPT help
 		b.vx = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
 		b.vy = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
 		b.vz = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
@@ -446,6 +447,7 @@ void updateBoid(Boid& b) {
 	b.z += b.vz;
 
 	
+	// code with chatGPT help
 	if (b.x < -1.0f) {
 		b.vx = abs(b.vx);
 	}
