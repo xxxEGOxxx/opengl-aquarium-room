@@ -39,9 +39,8 @@ int main(int argc, char** argv)
 	glViewport(0, 0, 500, 500);
 
 	init(window);
-
+	initBoids();
 	// uruchomienie glownej petli
-
 	renderLoop(window);
 
 	shutdown(window);

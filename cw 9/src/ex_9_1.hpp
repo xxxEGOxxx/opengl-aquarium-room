@@ -15,6 +15,19 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <string>
+#include <vector>
+#include <cmath>
+#include <glut.h>
+
+
+const int DEPTH = 100;
+const int NUM_BOIDS = 20;
+const float BOID_SIZE = 0.05f;
+const float MAX_SPEED = 0.02f;
+const float NEIGHBOR_RADIUS = 0.1f;
+const float SEPARATION_WEIGHT = 1.0f;
+const float ALIGNMENT_WEIGHT = 1.0f;
+const float COHESION_WEIGHT = 1.0f;
 
 //const unsigned int SHADOW_WIDTH = 16384, SHADOW_HEIGHT = 16384;
 const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
@@ -220,6 +233,8 @@ bool animal_in_aquarium = false;
 float lastTime = -1.f;
 float deltaTime = 0.f;
 
+
+
 void updateDeltaTime(float time) {
 	if (lastTime < 0) {
 		lastTime = time;
@@ -230,6 +245,136 @@ void updateDeltaTime(float time) {
 	if (deltaTime > 0.1) deltaTime = 0.1;
 	lastTime = time;
 }
+
+
+
+struct Boid
+{
+	float x, y, z;
+	float vx, vy, vz;
+};
+
+std::vector<Boid> boids;
+
+void initBoids()
+{
+	for (int i = 0; i < NUM_BOIDS; i++)
+	{
+		Boid b;
+		//b.x = float(rand()) / RAND_MAX * 2 - 1;
+		b.x = 12;
+		b.y = 1;
+		b.z = 4;
+		b.vx = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
+		b.vy = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
+		b.vz = ((float)rand() / RAND_MAX) * MAX_SPEED * 2.0f - MAX_SPEED;
+		boids.push_back(b);
+	}
+}
+void updateBoid(Boid& b) {
+	float separationX = 0.0f, separationY = 0.0f, separationZ = 0.0f;
+	float alignmentX = 0.0f, alignmentY = 0.0f, alignmentZ = 0.0f;
+	float cohesionX = 0.0f, cohesionY = 0.0f, cohesionZ = 0.0f;
+	int numNeighbors = 0;
+	for (int i = 0; i < NUM_BOIDS; i++) {
+		Boid b2 = boids[i];
+		float dx = b.x - b2.x;
+		float dy = b.y - b2.y;
+		float dz = b.z - b2.z;
+		float dist = sqrt(dx * dx + dy * dy + dz * dz);
+		if (dist > 0.0f && dist < NEIGHBOR_RADIUS) {
+			numNeighbors++;
+			separationX += dx / dist;
+			separationY += dy / dist;
+			separationZ += dz / dist;
+			alignmentX += b2.vx;
+			alignmentY += b2.vy;
+			alignmentZ += b2.vz;
+			cohesionX += b2.x;
+			cohesionY += b2.y;
+			cohesionZ += b2.z;
+		}
+	}
+	if (numNeighbors > 0) {
+		separationX /= (float)numNeighbors;
+		separationY /= (float)numNeighbors;
+		separationZ /= (float)numNeighbors;
+		alignmentX /= (float)numNeighbors;
+		alignmentY /= (float)numNeighbors;
+		alignmentZ /= (float)numNeighbors;
+		cohesionX /= (float)numNeighbors;
+		cohesionY /= (float)numNeighbors;
+		cohesionZ /= (float)numNeighbors;
+		separationX = separationX * SEPARATION_WEIGHT;
+		separationY = separationY * SEPARATION_WEIGHT;
+		separationZ = separationZ * SEPARATION_WEIGHT;
+		alignmentX = alignmentX * ALIGNMENT_WEIGHT;
+		alignmentY = alignmentY * ALIGNMENT_WEIGHT;
+		alignmentZ = alignmentZ * ALIGNMENT_WEIGHT;
+		cohesionX = (cohesionX / (float)numNeighbors - b.x) * COHESION_WEIGHT;
+		cohesionY = (cohesionY / (float)numNeighbors - b.y) * COHESION_WEIGHT;
+		cohesionZ = (cohesionZ / (float)numNeighbors - b.z) * COHESION_WEIGHT;
+
+		b.vx += separationX + alignmentX + cohesionX;
+		b.vy += separationY + alignmentY + cohesionY;
+		b.vz += separationZ + alignmentZ + cohesionZ;
+
+		float speed = sqrt(b.vx * b.vx + b.vy * b.vy + b.vz * b.vz);
+		if (speed > MAX_SPEED) {
+			b.vx = b.vx / speed * MAX_SPEED;
+			b.vy = b.vy / speed * MAX_SPEED;
+			b.vz = b.vz / speed * MAX_SPEED;
+		}
+	}
+
+	b.x += b.vx;
+	b.y += b.vy;
+	b.z += b.vz;
+
+	if (b.x < -1.0f) {
+		b.vx = abs(b.vx);
+	}
+	if (b.x > 4.0f) {
+		b.vx = -abs(b.vx);
+	}
+	if (b.y < -1.0f) {
+		b.vy = abs(b.vy);
+	}
+	if (b.y > 4.0f) {
+		b.vy = -abs(b.vy);
+	}
+	if (b.z < -1.0f) {
+		b.vz = abs(b.vz);
+	}
+	if (b.z > 5.0f) {
+		b.vz = -abs(b.vz);
+	}
+
+}
+
+
+/*
+void renderBoids()
+{
+	float time = glfwGetTime();
+	for (int i = 0; i < NUM_BOIDS; i++)
+	{
+
+		float x = boids[i].x;
+		float y = boids[i].y;
+		float z = boids[i].z;
+
+		drawObjectPBRWithTexture(models::fish2Context,
+			glm::translate(glm::vec3(3.f, 1.0f, 0.45f))
+			* glm::rotate(glm::radians(sin(time / 2) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+			* glm::eulerAngleY(time - 12) * glm::translate(glm::vec3(1.2f, 0, 0))
+			* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+			texture::fishBlueTexture,
+			0.5f, 0.0f, 0);
+	}
+}*/
+
+
 glm::mat4 createCameraMatrix()
 {
 	glm::vec3 cameraSide = glm::normalize(glm::cross(cameraDir,glm::vec3(0.f,1.f,0.f)));
@@ -446,8 +591,24 @@ void renderShadowapSun(GLuint depthMapFBO, glm::mat4 lightVP) {
 		* glm::eulerAngleY(time - 11) * glm::translate(glm::vec3(1.2f, 0, 0))
 		* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
 		);
+
+	for (int i = 0; i < NUM_BOIDS; i++)
+	{
+
+		float x = boids[i].x;
+		float y = boids[i].y;
+		float z = boids[i].z;
+
+		drawObjectDepth(models::fish2Context, lightVP,
+			glm::translate(glm::vec3(x, y, z))
+		//*glm::rotate(glm::radians(sin(time / 2 + 23) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+			//* glm::eulerAngleY(time - 11)* glm::translate(glm::vec3(1.2f, 0, 0))
+			//* glm::scale(glm::vec3(0.2f))* glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0))
+			);
+	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 	glViewport(0, 0, WIDTH, HEIGHT);
 }
 
@@ -682,11 +843,27 @@ void renderScene(GLFWwindow* window)
 	drawObjectPBRWithTexture(models::aquariumContext, glm::mat4(), texture::aquariumTexture, 0.8f, 0.0f, 5);
 	drawObjectPBRWithTexture(models::glassWindowContext, glm::mat4(), texture::glassWallTexture, 0.5f, 0.0f, 5);
 
+	for (int i = 0; i < NUM_BOIDS; i++)
+	{
 
+		float x = boids[i].x;
+		float y = boids[i].y;
+		float z = boids[i].z;
 
-	
+		drawObjectPBRWithTexture(models::fish2Context,
+			glm::translate(glm::vec3(x, y, z)),
+			//* glm::rotate(glm::radians(sin(time / 2) * 5.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+			//* glm::eulerAngleY(time - 12) * glm::translate(glm::vec3(1.2f, 0, 0))
+			//* glm::scale(glm::vec3(0.2f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 1, 0)),
+			texture::fishGreenTexture,
+			0.5f, 0.0f, 0);
+	}
+	for (int i = 0; i < NUM_BOIDS; i++) {
+		updateBoid(boids[i]);
+	}
 	//Terraingen();
 	
+
 
 
 	//test depth buffer
@@ -699,6 +876,8 @@ void renderScene(GLFWwindow* window)
 	glUseProgram(0);
 	glfwSwapBuffers(window);
 }
+
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -985,9 +1164,18 @@ void processInput(GLFWwindow* window)
 void renderLoop(GLFWwindow* window) {
 	while (!glfwWindowShouldClose(window))
 	{
+		//glClear(GL_COLOR_BUFFER_BIT);
+
+		//updateBoids();
+		//renderBoids();
+
+		//glfwSwapBuffers(window);
 		processInput(window);
 		renderScene(window);
 		glfwPollEvents();
+
+		
 	}
+	
 }
 //}
